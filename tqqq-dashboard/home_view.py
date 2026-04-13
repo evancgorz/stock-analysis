@@ -310,6 +310,11 @@ def render() -> None:
     trades = extract_trades(strategy_frame)
     latest = strategy_frame.iloc[-1]
     latest_ath = strategy_frame["spx_close"].cummax().iloc[-1]
+    latest_day_change = (
+        strategy_frame["spx_close"].pct_change().iloc[-1]
+        if len(strategy_frame) > 1
+        else 0.0
+    )
 
     total_return = strategy_frame["strategy_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
     voo_buy_hold_return = strategy_frame["voo_buy_hold_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
@@ -333,6 +338,10 @@ def render() -> None:
     level_metrics = st.columns(2)
     level_metrics[0].metric("200-day SMA", f"{latest['spx_sma']:,.2f}")
     level_metrics[1].metric("Latest ATH", f"{latest_ath:,.2f}")
+
+    change_metrics = st.columns(2)
+    change_metrics[0].metric("Today % change", format_pct(latest_day_change))
+    change_metrics[1].metric("Current holding", str(latest["active_asset"]))
 
     st.subheader("Trading check")
     st.plotly_chart(build_signal_check_figure(strategy_frame, upper_band, lower_band), use_container_width=True)
