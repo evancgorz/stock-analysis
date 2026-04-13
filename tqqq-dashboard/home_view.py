@@ -58,6 +58,73 @@ def build_equity_figure(frame: pd.DataFrame) -> go.Figure:
     return figure
 
 
+def build_signal_check_figure(
+    frame: pd.DataFrame,
+    upper_band: float,
+    lower_band: float,
+    lookback_bars: int = 126,
+) -> go.Figure:
+    window = frame.tail(lookback_bars).copy()
+    upper_trigger = window["spx_sma"] * (1 + upper_band)
+    lower_trigger = window["spx_sma"] * (1 + lower_band)
+
+    figure = go.Figure()
+    figure.add_trace(
+        go.Scatter(
+            x=window.index,
+            y=window["spx_close"],
+            mode="lines",
+            name="S&P 500",
+            line={"color": "#1f3b57", "width": 2.6},
+        )
+    )
+    figure.add_trace(
+        go.Scatter(
+            x=window.index,
+            y=window["spx_sma"],
+            mode="lines",
+            name="SMA",
+            line={"color": "#7c6a58", "width": 1.8},
+        )
+    )
+    figure.add_trace(
+        go.Scatter(
+            x=window.index,
+            y=upper_trigger,
+            mode="lines",
+            name="Buy level",
+            line={"color": "#0d7a5f", "width": 2},
+        )
+    )
+    figure.add_trace(
+        go.Scatter(
+            x=window.index,
+            y=lower_trigger,
+            mode="lines",
+            name="Reset level",
+            line={"color": "#a12e2b", "width": 2},
+        )
+    )
+    ath_points = window[window["is_new_ath"]]
+    figure.add_trace(
+        go.Scatter(
+            x=ath_points.index,
+            y=ath_points["spx_close"],
+            mode="markers",
+            name="ATH",
+            marker={"color": "#d99100", "size": 7},
+        )
+    )
+    figure.update_layout(
+        margin={"l": 12, "r": 12, "t": 20, "b": 12},
+        height=320,
+        template="plotly_white",
+        legend={"orientation": "h", "y": 1.08, "x": 0},
+        yaxis_title="S&P 500 price",
+    )
+    return figure
+
+
 def build_drawdown_figure(frame: pd.DataFrame) -> go.Figure:
     figure = go.Figure()
     figure.add_trace(
@@ -242,6 +309,7 @@ def render() -> None:
 
     trades = extract_trades(strategy_frame)
     latest = strategy_frame.iloc[-1]
+    latest_ath = strategy_frame["spx_close"].cummax().iloc[-1]
 
     total_return = strategy_frame["strategy_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
     voo_buy_hold_return = strategy_frame["voo_buy_hold_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
@@ -253,17 +321,57 @@ def render() -> None:
     strategy_sharpe = sharpe_ratio(strategy_frame["strategy_return"])
     voo_buy_hold_sharpe = sharpe_ratio(strategy_frame["voo_buy_hold_return"])
 
-    metrics = st.columns(6)
-    metrics[0].metric("Current holding", str(latest["active_asset"]))
-    metrics[1].metric("Strategy return", format_pct(total_return))
-    metrics[2].metric("VOO buy & hold", format_pct(voo_buy_hold_return))
-    metrics[3].metric("Max drawdown", format_pct(max_drawdown))
-    metrics[4].metric("Time invested", format_pct(time_in_market))
-    metrics[5].metric("Win rate", format_pct(win_rate))
+    st.subheader("Latest state")
+    state_metrics = st.columns(2)
+    state_metrics[0].metric("Phase", str(latest["phase"]))
+    state_metrics[1].metric("Latest event", str(latest["event"] or "None"))
 
-    left, right = st.columns([1.45, 1.0])
+    key_metrics = st.columns(2)
+    key_metrics[0].metric("Distance to SMA", format_pct(latest["distance_to_sma"]))
+    key_metrics[1].metric("S&P 500 close", f"{latest['spx_close']:,.2f}")
 
-    with left:
+    level_metrics = st.columns(2)
+    level_metrics[0].metric("200-day SMA", f"{latest['spx_sma']:,.2f}")
+    level_metrics[1].metric("Latest ATH", f"{latest_ath:,.2f}")
+
+    st.subheader("Trading check")
+    st.plotly_chart(build_signal_check_figure(strategy_frame, upper_band, lower_band), use_container_width=True)
+
+    with st.expander("More charts and performance"):
+        st.subheader("Performance details")
+        summary = pd.DataFrame(
+            {
+                "Metric": [
+                    "Total return",
+                    "Annualized return",
+                    "Sharpe ratio",
+                    "Final equity",
+                    "Max drawdown",
+                    "Time invested",
+                    "Win rate",
+                ],
+                "Play the Dip": [
+                    format_pct(total_return),
+                    format_pct(strategy_annualized_return),
+                    f"{strategy_sharpe:.2f}",
+                    format_usd(strategy_frame["strategy_equity"].iloc[-1]),
+                    format_pct(max_drawdown),
+                    format_pct(time_in_market),
+                    format_pct(win_rate),
+                ],
+                "VOO Buy & Hold": [
+                    format_pct(voo_buy_hold_return),
+                    format_pct(voo_annualized_return),
+                    f"{voo_buy_hold_sharpe:.2f}",
+                    format_usd(strategy_frame["voo_buy_hold_equity"].iloc[-1]),
+                    "",
+                    "",
+                    "",
+                ],
+            }
+        )
+        st.dataframe(summary, use_container_width=True, hide_index=True)
+
         st.subheader("S&P 500 Price and Trigger Levels")
         st.plotly_chart(build_price_regime_figure(strategy_frame, upper_band, lower_band), use_container_width=True)
 
@@ -276,63 +384,29 @@ def render() -> None:
         st.subheader("Drawdown")
         st.plotly_chart(build_drawdown_figure(strategy_frame), use_container_width=True)
 
-    with right:
-        st.subheader("Latest state")
-        st.markdown(
-            f"""
-            **Phase:** {latest["phase"]}  
-            **Current holding:** {latest["active_asset"]}  
-            **Latest event:** {latest["event"] or "None"}  
-            **S&P 500 close:** {latest["spx_close"]:,.2f}  
-            **200-day SMA:** {latest["spx_sma"]:,.2f}  
-            **Distance to SMA:** {format_pct(latest["distance_to_sma"])}  
-            **New ATH today:** {"Yes" if latest["is_new_ath"] else "No"}
-            """
-        )
+    with st.expander("Trade log"):
+        if trades.empty:
+            st.info("No completed trades were generated for the selected period.")
+        else:
+            st.dataframe(trades, use_container_width=True, hide_index=True)
 
-        st.subheader("Performance details")
-        summary = pd.DataFrame(
-            {
-                "Metric": ["Total return", "Annualized return", "Sharpe ratio", "Final equity"],
-                "Play the Dip": [
-                    format_pct(total_return),
-                    format_pct(strategy_annualized_return),
-                    f"{strategy_sharpe:.2f}",
-                    format_usd(strategy_frame["strategy_equity"].iloc[-1]),
-                ],
-                "VOO Buy & Hold": [
-                    format_pct(voo_buy_hold_return),
-                    format_pct(voo_annualized_return),
-                    f"{voo_buy_hold_sharpe:.2f}",
-                    format_usd(strategy_frame["voo_buy_hold_equity"].iloc[-1]),
-                ],
-            }
-        )
-        st.dataframe(summary, use_container_width=True, hide_index=True)
-
-    st.subheader("Trade log")
-    if trades.empty:
-        st.info("No completed trades were generated for the selected period.")
-    else:
-        st.dataframe(trades, use_container_width=True, hide_index=True)
-
-    st.subheader("Backtest data")
-    display_frame = strategy_frame[
-        [
-            "tqqq_close",
-            "voo_close",
-            "spx_close",
-            "spx_sma",
-            "distance_to_sma",
-            "is_new_ath",
-            "phase",
-            "event",
-            "signal",
-            "position",
-            "active_asset",
-            "strategy_equity",
-            "voo_buy_hold_equity",
-        ]
-    ].copy()
-    display_frame["distance_to_sma"] = (display_frame["distance_to_sma"] * 100).round(2)
-    st.dataframe(display_frame, use_container_width=True)
+    with st.expander("Backtest data"):
+        display_frame = strategy_frame[
+            [
+                "tqqq_close",
+                "voo_close",
+                "spx_close",
+                "spx_sma",
+                "distance_to_sma",
+                "is_new_ath",
+                "phase",
+                "event",
+                "signal",
+                "position",
+                "active_asset",
+                "strategy_equity",
+                "voo_buy_hold_equity",
+            ]
+        ].copy()
+        display_frame["distance_to_sma"] = (display_frame["distance_to_sma"] * 100).round(2)
+        st.dataframe(display_frame, use_container_width=True)
