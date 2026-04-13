@@ -19,6 +19,7 @@ class Trade:
     exit_price: float
     return_pct: float
     exit_reason: str
+    status: str
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
@@ -96,15 +97,15 @@ def build_play_the_dip_frame(
             target_long = False
             awaiting_reset = True
             buy_armed = False
-            event = "Sold on new ATH"
+            event = "New S&P 500 ATH"
         elif awaiting_reset and distance < lower_band:
             awaiting_reset = False
             buy_armed = True
-            event = "Reset armed"
+            event = "Reset level reached"
         elif (not target_long) and buy_armed and distance > upper_band:
             target_long = True
             buy_armed = False
-            event = "Buy signal accepted"
+            event = "Buy level reached"
 
         if target_long:
             phase = "Holding TQQQ"
@@ -157,7 +158,14 @@ def extract_trades(frame: pd.DataFrame) -> pd.DataFrame:
     for entry_date, exit_date in zip(entries, exits):
         entry_price = float(frame.loc[entry_date, "tqqq_close"])
         exit_price = float(frame.loc[exit_date, "tqqq_close"])
-        exit_event = frame.loc[exit_date, "event"] or "Open position marked to market"
+        has_real_exit = position_changes.loc[exit_date] == -1.0
+        exit_event = frame.loc[exit_date, "event"]
+        if has_real_exit:
+            exit_reason = str(exit_event or "Exit signal")
+            status = "Closed"
+        else:
+            exit_reason = "Open trade as of selected end date"
+            status = "Open"
         trades.append(
             Trade(
                 entry_date=entry_date,
@@ -165,13 +173,15 @@ def extract_trades(frame: pd.DataFrame) -> pd.DataFrame:
                 entry_price=entry_price,
                 exit_price=exit_price,
                 return_pct=exit_price / entry_price - 1.0,
-                exit_reason=str(exit_event),
+                exit_reason=exit_reason,
+                status=status,
             )
         )
 
     return pd.DataFrame(
         [
             {
+                "Status": trade.status,
                 "Entry date": trade.entry_date.date(),
                 "Exit date": trade.exit_date.date(),
                 "Entry price": round(trade.entry_price, 2),
