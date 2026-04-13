@@ -1,0 +1,16 @@
+.codex/
+repo-inspect/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+tqqq-dashboard/__pycache__/
+tqqq-dashboard/user_state.json
+tqqq-dashboard/app.js
+tqqq-dashboard/index.html
+tqqq-dashboard/styles.css
+
+battery-report.html
+adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-10.1.4.uf2
+read_serial.py
