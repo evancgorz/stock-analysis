@@ -8,8 +8,8 @@ import yfinance as yf
 TICKERS = ["TQQQ", "SPY", "QQQ"]
 
 
-@st.cache_data(show_spinner=False, ttl=900)
-def load_current_market_snapshot() -> pd.DataFrame:
+@st.cache_data(show_spinner=False, ttl=3600)
+def load_daily_reference_data() -> pd.DataFrame:
     raw = yf.download(
         TICKERS,
         period="2y",
@@ -31,24 +31,62 @@ def load_current_market_snapshot() -> pd.DataFrame:
         if len(series) < 200:
             continue
 
-        latest_price = float(series.iloc[-1])
-        previous_price = float(series.iloc[-2]) if len(series) > 1 else latest_price
-        day_change_pct = (latest_price / previous_price - 1.0) if previous_price else 0.0
         trailing_year = series.tail(252)
         sma_200 = float(series.rolling(200).mean().iloc[-1])
 
         rows.append(
             {
                 "Ticker": ticker,
-                "Price": latest_price,
-                "Day change %": day_change_pct,
                 "52-week high": float(trailing_year.max()),
                 "52-week low": float(trailing_year.min()),
                 "200-day SMA": sma_200,
+                "Prev close": float(series.iloc[-2]) if len(series) > 1 else float(series.iloc[-1]),
             }
         )
 
     return pd.DataFrame(rows)
+
+
+@st.cache_data(show_spinner=False, ttl=5)
+def load_live_prices() -> pd.DataFrame:
+    intraday = yf.download(
+        TICKERS,
+        period="5d",
+        interval="1m",
+        auto_adjust=True,
+        progress=False,
+        prepost=True,
+    )
+
+    if intraday.empty:
+        raise ValueError("No intraday data returned from yfinance.")
+
+    closes = intraday["Close"].copy()
+    closes.index = pd.to_datetime(closes.index)
+    closes = closes.dropna(how="all")
+
+    rows: list[dict[str, float | str]] = []
+    for ticker in TICKERS:
+        series = closes[ticker].dropna()
+        if series.empty:
+            continue
+        rows.append(
+            {
+                "Ticker": ticker,
+                "Price": float(series.iloc[-1]),
+            }
+        )
+
+    return pd.DataFrame(rows)
+
+
+def load_current_market_snapshot() -> pd.DataFrame:
+    reference = load_daily_reference_data()
+    live = load_live_prices()
+    snapshot = reference.merge(live, on="Ticker", how="left")
+    snapshot["Price"] = snapshot["Price"].fillna(snapshot["Prev close"])
+    snapshot["Day change %"] = snapshot["Price"] / snapshot["Prev close"] - 1.0
+    return snapshot[["Ticker", "Price", "Day change %", "52-week high", "52-week low", "200-day SMA"]]
 
 
 def format_price(value: float) -> str:
@@ -67,14 +105,11 @@ def color_day_change(value: float) -> str:
     return "color: #6b7280; font-weight: 700;"
 
 
-def render() -> None:
-    st.title("Current Markets")
+@st.fragment(run_every="1s")
+def render_live_snapshot() -> None:
     st.caption(
-        "Quick daily snapshot for TQQQ, SPY, and QQQ with price, daily move, 52-week range, and 200-day SMA."
+        "Auto-refreshing while open. Quick snapshot for TQQQ, SPY, and QQQ with price, daily move, 52-week range, and 200-day SMA."
     )
-
-    if st.sidebar.button("Refresh market snapshot"):
-        st.cache_data.clear()
 
     try:
         snapshot = load_current_market_snapshot()
@@ -116,3 +151,12 @@ def render() -> None:
 
     st.subheader("Market Snapshot")
     st.dataframe(styled, use_container_width=True, hide_index=True)
+
+
+def render() -> None:
+    st.title("Current Markets")
+
+    if st.sidebar.button("Refresh market snapshot"):
+        st.cache_data.clear()
+
+    render_live_snapshot()
