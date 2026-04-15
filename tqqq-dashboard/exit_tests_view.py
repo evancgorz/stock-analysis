@@ -28,8 +28,7 @@ PAGE_DEFAULTS = {
 }
 
 EXIT_RULES: dict[str, str] = {
-    "new_ath": "Sell at SPX ATH",
-    "tqqq_trailing_5_after_ath": "SPX ATH then TQQQ 5% trailing stop",
+    "tqqq_trailing_10_immediate": "TQQQ 10% trailing stop from entry",
     "tqqq_trailing_10_after_ath": "SPX ATH then TQQQ 10% trailing stop",
 }
 
@@ -39,13 +38,9 @@ def _rule_triggered(
     row: pd.Series,
     trade_state: dict[str, float | int],
 ) -> tuple[bool, str]:
-    if rule_key == "new_ath":
-        return bool(row["is_new_ath"]), "Sold on new S&P 500 ATH"
-    if rule_key == "tqqq_trailing_5_after_ath":
-        if not bool(trade_state["ath_reached"]):
-            return False, ""
-        stop_level = float(trade_state["peak_tqqq"]) * 0.95
-        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 5% after the S&P 500 reached a new ATH"
+    if rule_key == "tqqq_trailing_10_immediate":
+        stop_level = float(trade_state["peak_tqqq"]) * 0.90
+        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% from its post-entry high"
     if rule_key == "tqqq_trailing_10_after_ath":
         if not bool(trade_state["ath_reached"]):
             return False, ""
@@ -188,7 +183,7 @@ def run_exit_rule_analysis(start_date: str, end_date: str, defensive_asset: str)
         equity_frame[rule_name] = frame["strategy_equity"]
 
     if not equity_frame.empty:
-        benchmark = build_exit_test_frame(data, defensive_asset, "new_ath")
+        benchmark = build_exit_test_frame(data, defensive_asset, "tqqq_trailing_10_immediate")
         equity_frame["S&P 500 Buy & Hold"] = benchmark["spx_buy_hold_equity"]
 
     summary = pd.DataFrame(summary_rows)
@@ -197,8 +192,7 @@ def run_exit_rule_analysis(start_date: str, end_date: str, defensive_asset: str)
 
 def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -> go.Figure:
     color_map = {
-        "Sell at SPX ATH": "#d99100",
-        "SPX ATH then TQQQ 5% trailing stop": "#7a1f5c",
+        "TQQQ 10% trailing stop from entry": "#1f3b57",
         "SPX ATH then TQQQ 10% trailing stop": "#b14f29",
         "S&P 500 Buy & Hold": "#4d4d4d",
     }
@@ -240,7 +234,7 @@ def render() -> None:
 
     st.title("Exit Tests")
     st.caption(
-        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares three exit approaches: sell immediately at a new S&P 500 ATH, or wait for a 5% or 10% TQQQ trailing stop after that ATH is reached."
+        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares two exit approaches: a 10% TQQQ trailing stop from entry versus a 10% TQQQ trailing stop that only activates after the S&P 500 reaches a fresh all-time high."
     )
 
     with st.sidebar:
