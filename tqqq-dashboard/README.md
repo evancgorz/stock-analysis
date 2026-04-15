@@ -11,7 +11,7 @@ This Streamlit app focuses on the `Play the Dip` strategy and the analysis tools
 
 The current `Play the Dip` model:
 
-- uses `^GSPC` as the signal series
+- uses the S&P 500 total return index via `^SP500TR` as the signal series
 - calculates a rolling SMA
 - buys TQQQ when the S&P 500 rises above the upper threshold relative to the SMA
 - sells when the S&P 500 prints a fresh all-time high

@@ -9,6 +9,7 @@ import yfinance as yf
 
 
 INITIAL_CAPITAL = 100_000.0
+SP500_REFERENCE_TICKER = "^SP500TR"
 
 
 @dataclass
@@ -25,7 +26,7 @@ class Trade:
 @st.cache_data(show_spinner=False, ttl=3600)
 def download_market_data(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
     raw = yf.download(
-        ["TQQQ", "VOO", "^GSPC"],
+        ["TQQQ", "VOO", SP500_REFERENCE_TICKER],
         start=start_date.strftime("%Y-%m-%d"),
         end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
         auto_adjust=True,
@@ -36,7 +37,7 @@ def download_market_data(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd
         raise ValueError("No data returned from yfinance.")
 
     closes = raw["Close"].rename(
-        columns={"TQQQ": "tqqq_close", "VOO": "voo_close", "^GSPC": "spx_close"}
+        columns={"TQQQ": "tqqq_close", "VOO": "voo_close", SP500_REFERENCE_TICKER: "spx_close"}
     )
     data = closes.dropna().copy()
     data.index = pd.to_datetime(data.index)
