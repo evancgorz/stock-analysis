@@ -236,7 +236,7 @@ def render() -> None:
 
     st.title("Home")
     st.caption(
-        "Use this page to monitor the live strategy state, recent signals, and performance. Use Grid Search to compare SMA windows and matched thresholds across return, win rate, and Sharpe."
+        "Use this page to monitor the live strategy state, recent signals, and performance. The current strategy buys above the upper band, then switches to a 10% TQQQ trailing stop after the S&P 500 makes a fresh all-time high."
     )
 
     with st.sidebar:

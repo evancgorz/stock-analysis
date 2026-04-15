@@ -85,31 +85,50 @@ def build_play_the_dip_frame(
     signals = []
     phases = []
     events = []
+    trailing_stop_levels = []
 
     target_long = False
     awaiting_reset = False
     buy_armed = True
+    ath_reached = False
+    peak_tqqq = np.nan
 
     for _, row in ready.iterrows():
         event = ""
         distance = row["distance_to_sma"]
+        trailing_stop_level = np.nan
+        exited_this_bar = False
 
-        if target_long and row["is_new_ath"]:
-            target_long = False
-            awaiting_reset = True
-            buy_armed = False
-            event = "New S&P 500 ATH"
-        elif awaiting_reset and distance < lower_band:
+        if target_long:
+            peak_tqqq = max(float(peak_tqqq), float(row["tqqq_close"])) if pd.notna(peak_tqqq) else float(row["tqqq_close"])
+            if row["is_new_ath"] and not ath_reached:
+                ath_reached = True
+                event = "New S&P 500 ATH, trailing stop active"
+            if ath_reached:
+                trailing_stop_level = peak_tqqq * 0.90
+                if row["tqqq_close"] <= trailing_stop_level:
+                    target_long = False
+                    awaiting_reset = True
+                    buy_armed = False
+                    event = "TQQQ 10% trailing stop after ATH"
+                    exited_this_bar = True
+                    ath_reached = False
+                    peak_tqqq = np.nan
+                    trailing_stop_level = np.nan
+
+        if (not exited_this_bar) and awaiting_reset and distance < lower_band:
             awaiting_reset = False
             buy_armed = True
             event = "Reset level reached"
-        elif (not target_long) and buy_armed and distance > upper_band:
+        elif (not exited_this_bar) and (not target_long) and buy_armed and distance > upper_band:
             target_long = True
             buy_armed = False
+            ath_reached = False
+            peak_tqqq = float(row["tqqq_close"])
             event = "Buy level reached"
 
         if target_long:
-            phase = "Holding TQQQ"
+            phase = "Holding TQQQ with trailing stop active" if ath_reached else "Holding TQQQ"
         elif awaiting_reset:
             phase = "Waiting for reset below lower band"
         elif buy_armed:
@@ -120,10 +139,12 @@ def build_play_the_dip_frame(
         signals.append(1.0 if target_long else 0.0)
         phases.append(phase)
         events.append(event)
+        trailing_stop_levels.append(trailing_stop_level)
 
     ready["signal"] = signals
     ready["phase"] = phases
     ready["event"] = events
+    ready["tqqq_trailing_stop_level"] = trailing_stop_levels
     ready["position"] = ready["signal"].shift(1).fillna(0.0)
     ready["tqqq_return"] = ready["tqqq_close"].pct_change().fillna(0.0)
     ready["voo_return"] = ready["voo_close"].pct_change().fillna(0.0)
