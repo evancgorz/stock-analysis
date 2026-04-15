@@ -25,35 +25,13 @@ UPPER_BAND = 0.01
 LOWER_BAND = -0.01
 PAGE_DEFAULTS = {
     "defensive_asset": "Cash",
-    "selected_rules": [
-        "new_ath",
-        "spx_20_sma_break",
-        "tqqq_trailing_5",
-        "tqqq_trailing_10",
-        "near_ath_2",
-    ],
 }
 
 EXIT_RULES: dict[str, str] = {
-    "new_ath": "New S&P 500 ATH",
-    "spx_20_sma_break": "SPX below 20-day SMA",
-    "spx_50_sma_break": "SPX below 50-day SMA",
-    "tqqq_trailing_5": "TQQQ 5% trailing stop",
-    "tqqq_trailing_10": "TQQQ 10% trailing stop",
-    "spx_trailing_5": "SPX 5% trailing stop",
-    "time_stop_60": "60 trading day time stop",
-    "near_ath_2": "SPX within 2% of ATH",
-    "recovery_75": "75% recovery to prior ATH",
+    "new_ath": "Sell at SPX ATH",
+    "tqqq_trailing_5_after_ath": "SPX ATH then TQQQ 5% trailing stop",
+    "tqqq_trailing_10_after_ath": "SPX ATH then TQQQ 10% trailing stop",
 }
-
-
-def _merged_rule_selection(saved_rules: list[str] | None) -> list[str]:
-    saved_rules = saved_rules or []
-    ordered_rules: list[str] = []
-    for rule in [*PAGE_DEFAULTS["selected_rules"], *saved_rules]:
-        if rule in EXIT_RULES and rule not in ordered_rules:
-            ordered_rules.append(rule)
-    return ordered_rules
 
 
 def _rule_triggered(
@@ -62,32 +40,17 @@ def _rule_triggered(
     trade_state: dict[str, float | int],
 ) -> tuple[bool, str]:
     if rule_key == "new_ath":
-        return bool(row["is_new_ath"]), "New S&P 500 ATH"
-    if rule_key == "spx_20_sma_break":
-        return bool(row["spx_close"] < row["spx_20_sma"]), "SPX closed below 20-day SMA"
-    if rule_key == "spx_50_sma_break":
-        return bool(row["spx_close"] < row["spx_50_sma"]), "SPX closed below 50-day SMA"
-    if rule_key == "tqqq_trailing_5":
+        return bool(row["is_new_ath"]), "Sold on new S&P 500 ATH"
+    if rule_key == "tqqq_trailing_5_after_ath":
+        if not bool(trade_state["ath_reached"]):
+            return False, ""
         stop_level = float(trade_state["peak_tqqq"]) * 0.95
-        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 5% from its post-entry high"
-    if rule_key == "tqqq_trailing_10":
+        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 5% after the S&P 500 reached a new ATH"
+    if rule_key == "tqqq_trailing_10_after_ath":
+        if not bool(trade_state["ath_reached"]):
+            return False, ""
         stop_level = float(trade_state["peak_tqqq"]) * 0.90
-        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% from its post-entry high"
-    if rule_key == "spx_trailing_5":
-        stop_level = float(trade_state["peak_spx"]) * 0.95
-        return bool(row["spx_close"] <= stop_level), "S&P 500 fell 5% from its post-entry high"
-    if rule_key == "time_stop_60":
-        return bool(int(trade_state["days_in_trade"]) >= 60), "Reached 60 trading days in position"
-    if rule_key == "near_ath_2":
-        prior_ath = float(row["prior_ath"]) if pd.notna(row["prior_ath"]) else np.nan
-        if np.isnan(prior_ath) or prior_ath <= 0:
-            return False, ""
-        return bool(row["spx_close"] >= prior_ath * 0.98), "S&P 500 moved within 2% of its prior ATH"
-    if rule_key == "recovery_75":
-        target_level = float(trade_state["recovery_target"])
-        if np.isnan(target_level):
-            return False, ""
-        return bool(row["spx_close"] >= target_level), "S&P 500 recovered 75% of the move back to its prior ATH"
+        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% after the S&P 500 reached a new ATH"
     raise ValueError(f"Unsupported exit rule: {rule_key}")
 
 
@@ -114,7 +77,7 @@ def build_exit_test_frame(data: pd.DataFrame, defensive_asset: str, rule_key: st
         "peak_tqqq": np.nan,
         "peak_spx": np.nan,
         "days_in_trade": 0,
-        "recovery_target": np.nan,
+        "ath_reached": False,
     }
 
     for _, row in ready.iterrows():
@@ -125,6 +88,8 @@ def build_exit_test_frame(data: pd.DataFrame, defensive_asset: str, rule_key: st
             trade_state["peak_tqqq"] = max(float(trade_state["peak_tqqq"]), float(row["tqqq_close"]))
             trade_state["peak_spx"] = max(float(trade_state["peak_spx"]), float(row["spx_close"]))
             trade_state["days_in_trade"] = int(trade_state["days_in_trade"]) + 1
+            if bool(row["is_new_ath"]):
+                trade_state["ath_reached"] = True
             exit_now, exit_reason = _rule_triggered(rule_key, row, trade_state)
             if exit_now:
                 target_long = False
@@ -135,7 +100,7 @@ def build_exit_test_frame(data: pd.DataFrame, defensive_asset: str, rule_key: st
                     "peak_tqqq": np.nan,
                     "peak_spx": np.nan,
                     "days_in_trade": 0,
-                    "recovery_target": np.nan,
+                    "ath_reached": False,
                 }
         elif awaiting_reset and distance < LOWER_BAND:
             awaiting_reset = False
@@ -144,15 +109,11 @@ def build_exit_test_frame(data: pd.DataFrame, defensive_asset: str, rule_key: st
         elif (not target_long) and buy_armed and distance > UPPER_BAND:
             target_long = True
             buy_armed = False
-            prior_ath = float(row["prior_ath"]) if pd.notna(row["prior_ath"]) else np.nan
-            recovery_target = np.nan
-            if pd.notna(prior_ath):
-                recovery_target = float(row["spx_close"]) + 0.75 * (prior_ath - float(row["spx_close"]))
             trade_state = {
                 "peak_tqqq": float(row["tqqq_close"]),
                 "peak_spx": float(row["spx_close"]),
                 "days_in_trade": 0,
-                "recovery_target": recovery_target,
+                "ath_reached": False,
             }
             event = "Buy level reached"
 
@@ -236,15 +197,9 @@ def run_exit_rule_analysis(start_date: str, end_date: str, defensive_asset: str)
 
 def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -> go.Figure:
     color_map = {
-        "New S&P 500 ATH": "#d99100",
-        "SPX below 20-day SMA": "#1f3b57",
-        "SPX below 50-day SMA": "#3c5d7c",
-        "TQQQ 5% trailing stop": "#7a1f5c",
-        "TQQQ 10% trailing stop": "#b14f29",
-        "SPX 5% trailing stop": "#a12e2b",
-        "60 trading day time stop": "#7c6a58",
-        "SPX within 2% of ATH": "#0d7a5f",
-        "75% recovery to prior ATH": "#5a7d2b",
+        "Sell at SPX ATH": "#d99100",
+        "SPX ATH then TQQQ 5% trailing stop": "#7a1f5c",
+        "SPX ATH then TQQQ 10% trailing stop": "#b14f29",
         "S&P 500 Buy & Hold": "#4d4d4d",
     }
     figure = go.Figure()
@@ -282,11 +237,10 @@ def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -
 
 def render() -> None:
     saved_inputs = load_page_state(PAGE_KEY, PAGE_DEFAULTS)
-    initial_rule_selection = _merged_rule_selection(saved_inputs.get("selected_rules"))
 
     st.title("Exit Tests")
     st.caption(
-        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares different exit approaches side by side."
+        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares three exit approaches: sell immediately at a new S&P 500 ATH, or wait for a 5% or 10% TQQQ trailing stop after that ATH is reached."
     )
 
     with st.sidebar:
@@ -298,12 +252,6 @@ def render() -> None:
             options=["Cash", "VOO"],
             index=0 if saved_inputs["defensive_asset"] == "Cash" else 1,
         )
-        selected_rule_keys = st.multiselect(
-            "Exit approaches to plot",
-            options=list(EXIT_RULES.keys()),
-            default=initial_rule_selection,
-            format_func=lambda key: EXIT_RULES[key],
-        )
         if st.button("Refresh data"):
             st.cache_data.clear()
 
@@ -311,7 +259,6 @@ def render() -> None:
         PAGE_KEY,
         {
             "defensive_asset": defensive_asset,
-            "selected_rules": selected_rule_keys or initial_rule_selection,
         },
         last_page=PAGE_KEY,
     )
@@ -346,7 +293,7 @@ def render() -> None:
     st.subheader("Exit approach summary")
     st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    plotted_rule_names = [EXIT_RULES[key] for key in selected_rule_keys] if selected_rule_keys else [EXIT_RULES[key] for key in initial_rule_selection]
+    plotted_rule_names = list(EXIT_RULES.values())
     st.subheader("Equity comparison")
     st.plotly_chart(build_equity_figure(equity_frame, plotted_rule_names), use_container_width=True)
 
@@ -359,5 +306,5 @@ def render() -> None:
     st.dataframe(trade_logs[selected_log_name], use_container_width=True, hide_index=True)
 
     st.info(
-        "Assumptions for this test page: entries still use the same one-day-delayed execution as the main strategy page, and scale-out exits are not included yet because they are not one-step full exits."
+        "Assumptions for this test page: entries still use the same one-day-delayed execution as the main strategy page. For the trailing-stop variants, the TQQQ stop is inactive until the S&P 500 first makes a new ATH during the trade."
     )
