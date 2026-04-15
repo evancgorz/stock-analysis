@@ -236,7 +236,7 @@ def render() -> None:
 
     st.title("Home")
     st.caption(
-        "Use this page to monitor the live strategy state, recent signals, and performance. The current strategy buys above the upper band, then switches to a 10% TQQQ trailing stop after the S&P 500 makes a fresh all-time high."
+        "Strategy: buy TQQQ after the S&P 500 closes more than 1% above its 200-day SMA, stay defensive until that buy signal appears, activate a 10% TQQQ trailing stop after the S&P 500 makes a fresh all-time high, and only re-arm after the S&P 500 drops more than 1% below its 200-day SMA."
     )
 
     with st.sidebar:
