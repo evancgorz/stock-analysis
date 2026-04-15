@@ -170,6 +170,12 @@ def extract_trades(frame: pd.DataFrame) -> pd.DataFrame:
     position_changes = frame["position"].diff().fillna(frame["position"])
     entries = frame.index[position_changes == 1.0]
     exits = frame.index[position_changes == -1.0]
+    latest_price = float(frame["tqqq_close"].iloc[-1])
+    latest_stop_level = (
+        float(frame["tqqq_trailing_stop_level"].iloc[-1])
+        if "tqqq_trailing_stop_level" in frame.columns and pd.notna(frame["tqqq_trailing_stop_level"].iloc[-1])
+        else np.nan
+    )
 
     if frame["position"].iloc[0] == 1.0:
         entries = pd.Index([frame.index[0]]).append(entries)
@@ -182,35 +188,30 @@ def extract_trades(frame: pd.DataFrame) -> pd.DataFrame:
         exit_price = float(frame.loc[exit_date, "tqqq_close"])
         has_real_exit = position_changes.loc[exit_date] == -1.0
         exit_event = frame.loc[exit_date, "event"]
+        current_return_pct = latest_price / entry_price - 1.0
+        estimated_stop_return_pct = (
+            latest_stop_level / entry_price - 1.0 if pd.notna(latest_stop_level) else np.nan
+        )
         if has_real_exit:
             exit_reason = str(exit_event or "Exit signal")
             status = "Closed"
+            current_return_pct = exit_price / entry_price - 1.0
+            estimated_stop_return_pct = np.nan
         else:
             exit_reason = "Open trade as of selected end date"
             status = "Open"
         trades.append(
-            Trade(
-                entry_date=entry_date,
-                exit_date=exit_date,
-                entry_price=entry_price,
-                exit_price=exit_price,
-                return_pct=exit_price / entry_price - 1.0,
-                exit_reason=exit_reason,
-                status=status,
-            )
+            {
+                "Status": status,
+                "Entry date": entry_date.date(),
+                "Exit date": exit_date.date(),
+                "Entry price": round(entry_price, 2),
+                "Exit price": round(exit_price, 2),
+                "Return %": round((exit_price / entry_price - 1.0) * 100, 2),
+                "Current return %": round(current_return_pct * 100, 2),
+                "Estimated stop return %": round(estimated_stop_return_pct * 100, 2) if pd.notna(estimated_stop_return_pct) else np.nan,
+                "Exit reason": exit_reason,
+            }
         )
 
-    return pd.DataFrame(
-        [
-            {
-                "Status": trade.status,
-                "Entry date": trade.entry_date.date(),
-                "Exit date": trade.exit_date.date(),
-                "Entry price": round(trade.entry_price, 2),
-                "Exit price": round(trade.exit_price, 2),
-                "Return %": round(trade.return_pct * 100, 2),
-                "Exit reason": trade.exit_reason,
-            }
-            for trade in trades
-        ]
-    )
+    return pd.DataFrame(trades)
