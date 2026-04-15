@@ -36,7 +36,7 @@ def build_equity_figure(frame: pd.DataFrame) -> go.Figure:
             x=frame.index,
             y=frame["strategy_equity"],
             mode="lines",
-            name="Play the Dip",
+            name="Strategy",
             line={"color": "#b14f29", "width": 3},
         )
     )
@@ -236,7 +236,7 @@ def render() -> None:
 
     st.title("Home")
     st.caption(
-        "Play the Dip is now the core strategy. Use Grid Search to evaluate how SMA windows and matched thresholds affect win rate, Sharpe, and relative performance."
+        "Use this page to monitor the live strategy state, recent signals, and performance. Use Grid Search to compare SMA windows and matched thresholds across return, win rate, and Sharpe."
     )
 
     with st.sidebar:
@@ -359,7 +359,7 @@ def render() -> None:
                     "Time invested",
                     "Win rate",
                 ],
-                "Play the Dip": [
+                "Strategy": [
                     format_pct(total_return),
                     format_pct(strategy_annualized_return),
                     f"{strategy_sharpe:.2f}",

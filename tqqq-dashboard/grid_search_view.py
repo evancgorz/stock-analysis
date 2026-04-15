@@ -103,7 +103,7 @@ def render() -> None:
 
     st.title("Grid Search")
     st.caption(
-        "Sweep matched +/- thresholds and SMA windows to find stronger Play the Dip parameter zones."
+        "Sweep matched +/- thresholds and SMA windows to find stronger parameter combinations for the strategy."
     )
 
     with st.sidebar:

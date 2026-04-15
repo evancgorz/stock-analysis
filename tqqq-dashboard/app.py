@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(
-    page_title="Play the Dip Lab",
+    page_title="Strategy Lab",
     page_icon="bar_chart",
     layout="wide",
 )

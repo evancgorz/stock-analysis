@@ -1,15 +1,16 @@
 # TQQQ Strategy Dashboard
 
-This Streamlit app focuses on the `Play the Dip` strategy and the analysis tools around it.
+This Streamlit app focuses on a rules-based TQQQ strategy and the supporting analysis tools around it.
 
 ## Pages
 
 - `Home`: main strategy dashboard
+- `Current Markets`: live snapshot for TQQQ, SPY, and QQQ
 - `Grid Search`: sweep SMA windows and matched thresholds to compare win rate, Sharpe ratio, and strategy vs S&P 500 return
 
 ## Strategy
 
-The current `Play the Dip` model:
+The current strategy model:
 
 - uses the S&P 500 total return index via `^SP500TR` as the signal series
 - calculates a rolling SMA
@@ -22,8 +23,9 @@ To avoid lookahead bias, the app applies the signal from one trading day to the 
 
 ## Main Files
 
-- `app.py`: Streamlit entry point with explicit `Home` and `Grid Search` navigation
+- `app.py`: Streamlit entry point with explicit app navigation
 - `home_view.py`: main strategy dashboard
+- `current_markets_view.py`: live market snapshot page
 - `grid_search_view.py`: parameter grid search workspace
 - `play_the_dip_logic.py`: shared data download and backtest logic
 - `state_store.py`: lightweight saved UI state
