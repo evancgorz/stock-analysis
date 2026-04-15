@@ -28,6 +28,7 @@ PAGE_DEFAULTS = {
     "selected_rules": [
         "new_ath",
         "spx_20_sma_break",
+        "tqqq_trailing_5",
         "tqqq_trailing_10",
         "near_ath_2",
     ],
@@ -37,6 +38,7 @@ EXIT_RULES: dict[str, str] = {
     "new_ath": "New S&P 500 ATH",
     "spx_20_sma_break": "SPX below 20-day SMA",
     "spx_50_sma_break": "SPX below 50-day SMA",
+    "tqqq_trailing_5": "TQQQ 5% trailing stop",
     "tqqq_trailing_10": "TQQQ 10% trailing stop",
     "spx_trailing_5": "SPX 5% trailing stop",
     "time_stop_60": "60 trading day time stop",
@@ -56,6 +58,9 @@ def _rule_triggered(
         return bool(row["spx_close"] < row["spx_20_sma"]), "SPX closed below 20-day SMA"
     if rule_key == "spx_50_sma_break":
         return bool(row["spx_close"] < row["spx_50_sma"]), "SPX closed below 50-day SMA"
+    if rule_key == "tqqq_trailing_5":
+        stop_level = float(trade_state["peak_tqqq"]) * 0.95
+        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 5% from its post-entry high"
     if rule_key == "tqqq_trailing_10":
         stop_level = float(trade_state["peak_tqqq"]) * 0.90
         return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% from its post-entry high"
@@ -225,6 +230,7 @@ def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -
         "New S&P 500 ATH": "#d99100",
         "SPX below 20-day SMA": "#1f3b57",
         "SPX below 50-day SMA": "#3c5d7c",
+        "TQQQ 5% trailing stop": "#7a1f5c",
         "TQQQ 10% trailing stop": "#b14f29",
         "SPX 5% trailing stop": "#a12e2b",
         "60 trading day time stop": "#7c6a58",
