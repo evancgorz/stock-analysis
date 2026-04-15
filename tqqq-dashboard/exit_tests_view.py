@@ -47,6 +47,15 @@ EXIT_RULES: dict[str, str] = {
 }
 
 
+def _merged_rule_selection(saved_rules: list[str] | None) -> list[str]:
+    saved_rules = saved_rules or []
+    ordered_rules: list[str] = []
+    for rule in [*PAGE_DEFAULTS["selected_rules"], *saved_rules]:
+        if rule in EXIT_RULES and rule not in ordered_rules:
+            ordered_rules.append(rule)
+    return ordered_rules
+
+
 def _rule_triggered(
     rule_key: str,
     row: pd.Series,
@@ -273,6 +282,7 @@ def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -
 
 def render() -> None:
     saved_inputs = load_page_state(PAGE_KEY, PAGE_DEFAULTS)
+    initial_rule_selection = _merged_rule_selection(saved_inputs.get("selected_rules"))
 
     st.title("Exit Tests")
     st.caption(
@@ -291,7 +301,7 @@ def render() -> None:
         selected_rule_keys = st.multiselect(
             "Exit approaches to plot",
             options=list(EXIT_RULES.keys()),
-            default=[rule for rule in saved_inputs["selected_rules"] if rule in EXIT_RULES],
+            default=initial_rule_selection,
             format_func=lambda key: EXIT_RULES[key],
         )
         if st.button("Refresh data"):
@@ -301,7 +311,7 @@ def render() -> None:
         PAGE_KEY,
         {
             "defensive_asset": defensive_asset,
-            "selected_rules": selected_rule_keys or PAGE_DEFAULTS["selected_rules"],
+            "selected_rules": selected_rule_keys or initial_rule_selection,
         },
         last_page=PAGE_KEY,
     )
@@ -336,7 +346,7 @@ def render() -> None:
     st.subheader("Exit approach summary")
     st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    plotted_rule_names = [EXIT_RULES[key] for key in selected_rule_keys] if selected_rule_keys else [EXIT_RULES[key] for key in PAGE_DEFAULTS["selected_rules"]]
+    plotted_rule_names = [EXIT_RULES[key] for key in selected_rule_keys] if selected_rule_keys else [EXIT_RULES[key] for key in initial_rule_selection]
     st.subheader("Equity comparison")
     st.plotly_chart(build_equity_figure(equity_frame, plotted_rule_names), use_container_width=True)
 
