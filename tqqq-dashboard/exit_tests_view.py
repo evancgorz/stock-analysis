@@ -293,17 +293,18 @@ def render() -> None:
     st.subheader("Exit approach summary")
     st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    plotted_rule_names = list(EXIT_RULES.values())
-    st.subheader("Equity comparison")
-    st.plotly_chart(build_equity_figure(equity_frame, plotted_rule_names), use_container_width=True)
+    st.subheader("Trade logs")
+    for rule_name in EXIT_RULES.values():
+        st.markdown(f"**{rule_name}**")
+        trades = trade_logs.get(rule_name, pd.DataFrame())
+        if trades.empty:
+            st.info("No trades were generated for this exit approach in the selected period.")
+        else:
+            st.dataframe(trades, use_container_width=True, hide_index=True)
 
-    selected_log_name = st.selectbox(
-        "Trade log exit approach",
-        options=summary["Exit approach"].tolist(),
-        index=0,
-    )
-    st.subheader("Trade log")
-    st.dataframe(trade_logs[selected_log_name], use_container_width=True, hide_index=True)
+    with st.expander("Equity comparison chart"):
+        plotted_rule_names = list(EXIT_RULES.values())
+        st.plotly_chart(build_equity_figure(equity_frame, plotted_rule_names), use_container_width=True)
 
     st.info(
         "Assumptions for this test page: entries still use the same one-day-delayed execution as the main strategy page. For the trailing-stop variants, the TQQQ stop is inactive until the S&P 500 first makes a new ATH during the trade."
