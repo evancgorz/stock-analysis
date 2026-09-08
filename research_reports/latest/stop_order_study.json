@@ -1,0 +1,6 @@
+{
+  "reason": "A daily OHLC bar does not identify the within-day high/low order or a realistic gap-through fill. The provider history lacks the multi-year intraday bars needed for a defensible comparison.",
+  "required_next_step": "Replay recorded 5-minute or quote data with stop-at-market gap handling and explicit slippage before using this variant operationally.",
+  "status": "inconclusive",
+  "variant": "standing intraday stop-market after ATH activation"
+}

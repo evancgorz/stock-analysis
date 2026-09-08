@@ -1,0 +1,13 @@
+Family,Candidate,Status,Decision
+Trend horizon,SMA 150 / 200 / 250,Included,Research only; compare nearby settings and walk-forward folds.
+Entry buffer,0% / 1% / 2%,Included,Bounded one-variable comparison.
+Reset,-1% band / trend recross / five-session cooldown,Included,Bounded one-variable comparison.
+Exit,ATH sale / immediate 10% / ATH-activated 10% / trend failure,Included,Compare close-confirmed exits against frozen baseline.
+Trail width,8% / 10% / 15%,Included,Sensitivity only; no leaderboard promotion.
+Signal market,S&P total return / QQQ close,Included,"QQQ signal is a challenger, not an automatic replacement."
+Leverage,QQQ traded instead of TQQQ,Included,Same windows isolate the leverage contribution.
+Sizing,50% TQQQ / 50% VOO in risk-on windows,Included,Lower-risk challenger; weight is fixed and remainder stays in VOO.
+Attention,Weekly 40-week SMA,Included,Lower-attention challenger; fills remain next weekly bar in this proxy.
+Volatility sizing,Prior-data volatility cap,Deferred,No fixed cap and rebalance convention was specified; do not tune one after seeing results.
+Pullback entry,Trend-confirmed pullback/recovery,Deferred,No single operational definition was frozen before this run; preserve as a preregistered follow-up.
+2x leverage,2x Nasdaq fund,Unavailable,No verified 2x fund series was included in the common data feed; do not substitute a synthetic proxy.

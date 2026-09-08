@@ -1,0 +1,9 @@
+Dimension,Status,Evidence
+Accounting tests,Pass,"Event, cost, prefix-invariance, and fold-order tests pass."
+Paired VOO benefit,Mixed,1649.04 percentage-point full-period excess; episode table is primary.
+Cross-period consistency,Mixed,72.7% of one-year test folds beat VOO.
+Drawdown and recovery,Fail for promotion,Maximum drawdown -75.48%; user limit is not defined.
+Execution tolerance,Mixed,100.0% of second-session-open/cost cases beat VOO.
+Standing stop-market,Inconclusive,Withheld: multi-year intraday bars are unavailable and daily OHLC cannot establish within-day stop ordering or gap-through fills.
+Parameter stability,Research only,17 bounded candidates recorded; no automatic selection.
+Promotion decision,Inconclusive,"Needs an agreed loss limit, intraday fill evidence, and prospective paper observations."

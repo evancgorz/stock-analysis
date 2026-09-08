@@ -1,0 +1,19 @@
+{
+  "block": {
+    "block sessions": 21,
+    "median %": 183.8779475730035,
+    "method": "synchronized block bootstrap",
+    "p05 %": -69.40155273496286,
+    "p95 %": 1796.2060911129286,
+    "repetitions": 1000,
+    "sessions": 4023
+  },
+  "episode": {
+    "episodes": 9,
+    "median %": 184.47393633818862,
+    "method": "episode bootstrap with replacement",
+    "p05 %": -10.124671298086744,
+    "p95 %": 730.0228527120481,
+    "repetitions": 2000
+  }
+}

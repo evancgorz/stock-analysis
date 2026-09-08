@@ -8,6 +8,7 @@ __pycache__/
 tqqq-dashboard/__pycache__/
 tqqq-dashboard/user_state.json
 tqqq-dashboard/decision_journal.jsonl
+research_reports/debug/
 tqqq-dashboard/app.js
 tqqq-dashboard/index.html
 tqqq-dashboard/styles.css
