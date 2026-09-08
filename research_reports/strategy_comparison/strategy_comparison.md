@@ -22,7 +22,7 @@ The most credible improvement to investigate next is volatility-aware sizing or 
 | 50% TQQQ / 50% VOO risk-on | 20.15 | -52.97 | 0.76 | 0.87 | 948.51 | 33.21 | 16.60 | 18.00 |
 | QLD instead of TQQQ, same signal and timing | 21.11 | -57.36 | 0.77 | 0.88 | 1202.26 | 33.21 | 0.00 | 36.00 |
 | 50% TQQQ / 50% QLD risk-on | 22.14 | -67.29 | 0.72 | 0.80 | 1508.67 | 33.21 | 16.60 | 36.00 |
-| TQQQ in calm conditions, QLD in high volatility | 24.87 | -57.36 | 0.82 | 0.93 | 2537.74 | 33.21 | 17.23 | 98.00 |
+| TQQQ in calm conditions, QLD in high volatility | 24.87 | -57.36 | 0.82 | 0.93 | 2537.75 | 33.21 | 17.23 | 98.00 |
 
 ## Walk-forward consistency
 
