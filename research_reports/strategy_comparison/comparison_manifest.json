@@ -1,0 +1,101 @@
+{
+  "code_revision": "8fb469423604298a443234cec5ad52f044c5ecc8",
+  "data_sha256_csv": "d52cf7d95b3dbd0deb4d83a21a5f89f103679aab392c447075e272627ae7dc5e",
+  "end": "2026-09-08",
+  "policy_definitions": [
+    {
+      "fixed_weight": null,
+      "key": "current_tqqq",
+      "label": "Current strategy: 100% TQQQ risk-on",
+      "min_weight": 0.25,
+      "mode": "current",
+      "target_vol": null,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "tqqq_target_60",
+      "label": "TQQQ volatility target 60%",
+      "min_weight": 0.25,
+      "mode": "tqqq_target",
+      "target_vol": 0.6,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "tqqq_target_50",
+      "label": "TQQQ volatility target 50%",
+      "min_weight": 0.25,
+      "mode": "tqqq_target",
+      "target_vol": 0.5,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "tqqq_target_40",
+      "label": "TQQQ volatility target 40%",
+      "min_weight": 0.25,
+      "mode": "tqqq_target",
+      "target_vol": 0.4,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "tqqq_target_30",
+      "label": "TQQQ volatility target 30%",
+      "min_weight": 0.25,
+      "mode": "tqqq_target",
+      "target_vol": 0.3,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": 0.5,
+      "key": "tqqq_high_vol_half",
+      "label": "TQQQ half-size when prior volatility exceeds 60%",
+      "min_weight": 0.25,
+      "mode": "tqqq_filter",
+      "target_vol": null,
+      "volatility_threshold": 0.6
+    },
+    {
+      "fixed_weight": 0.5,
+      "key": "tqqq_half",
+      "label": "50% TQQQ / 50% VOO risk-on",
+      "min_weight": 0.25,
+      "mode": "fixed_tqqq",
+      "target_vol": null,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "qld_same_signal",
+      "label": "QLD instead of TQQQ, same signal and timing",
+      "min_weight": 0.25,
+      "mode": "qld",
+      "target_vol": null,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "tqqq_qld_mix",
+      "label": "50% TQQQ / 50% QLD risk-on",
+      "min_weight": 0.25,
+      "mode": "mix_tqqq_qld",
+      "target_vol": null,
+      "volatility_threshold": null
+    },
+    {
+      "fixed_weight": null,
+      "key": "leverage_ladder",
+      "label": "TQQQ in calm conditions, QLD in high volatility",
+      "min_weight": 0.25,
+      "mode": "ladder",
+      "target_vol": null,
+      "volatility_threshold": 0.6
+    }
+  ],
+  "rows": 4023,
+  "slippage_bps": 0.0,
+  "start": "2010-09-09",
+  "transaction_cost_bps": 5.0
+}

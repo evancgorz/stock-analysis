@@ -21,6 +21,8 @@ The current strategy:
 
 The research baseline is evaluated against continuous VOO during the same risk-on intervals and includes next-session execution, paired episode ledgers, cost/delay matrices, walk-forward folds, bounded alternatives, and an explicit paper-validation gate.
 
+The latest fixed-rule risk/return comparison is published in [`research_reports/strategy_comparison/strategy_comparison.md`](C:\Github\stock-analysis\research_reports\strategy_comparison\strategy_comparison.md).
+
 ## Project Layout
 
 - [`tqqq-dashboard/app.py`](C:\Users\GORCZYNE\OneDrive - Zoetis\Documents\New project\tqqq-dashboard\app.py): app entry point and explicit two-page navigation
