@@ -33,6 +33,8 @@ The strategy account is always invested in exactly one asset: `VOO` or `TQQQ`.
 - `research_engine.py`: shared event-driven simulator, fills, paired VOO episodes, and diagnostics
 - `research_runner.py`: reproducible report generator and experiment register
 - `strategy_comparison.py`: fixed-rule volatility-sizing, QLD, and risk-ladder comparison
+- `low_trade_comparison.py`: entry-locked sizing and low-attention exit-rule comparison
+- `../research_reports/low_trade_comparison/low_trade_comparison.md`: latest low-trading research report
 - `PAPER_VALIDATION.md`: prospective operational validation protocol
 - `STRATEGY_SPEC.md`: canonical account, signal, exit, and execution rules
 - `play_the_dip_logic.py`: shared data download and backtest logic
