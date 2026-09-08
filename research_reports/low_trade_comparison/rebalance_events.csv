@@ -1,0 +1,145 @@
+Policy,Policy key,Date,Turnover,TQQQ weight,QLD weight,Locked risk asset,Prior TQQQ volatility %
+Current strategy: 100% TQQQ risk-on,current_tqqq,2011-06-24,2.0,1.0,0.0,TQQQ,54.6964755574319
+Current strategy: 100% TQQQ risk-on,current_tqqq,2012-04-17,2.0,0.0,0.0,VOO,42.52044148335713
+Current strategy: 100% TQQQ risk-on,current_tqqq,2012-11-20,2.0,1.0,0.0,TQQQ,56.483964305748025
+Current strategy: 100% TQQQ risk-on,current_tqqq,2013-04-19,2.0,0.0,0.0,VOO,50.125053786217855
+Current strategy: 100% TQQQ risk-on,current_tqqq,2014-10-22,2.0,1.0,0.0,TQQQ,67.9661298049386
+Current strategy: 100% TQQQ risk-on,current_tqqq,2014-12-16,2.0,0.0,0.0,VOO,34.07276281811452
+Current strategy: 100% TQQQ risk-on,current_tqqq,2015-10-26,2.0,1.0,0.0,TQQQ,61.19433262384227
+Current strategy: 100% TQQQ risk-on,current_tqqq,2016-04-19,2.0,0.0,0.0,VOO,38.87126087160927
+Current strategy: 100% TQQQ risk-on,current_tqqq,2018-11-08,2.0,1.0,0.0,TQQQ,102.64437181349291
+Current strategy: 100% TQQQ risk-on,current_tqqq,2019-05-14,2.0,0.0,0.0,VOO,50.20878674772019
+Current strategy: 100% TQQQ risk-on,current_tqqq,2020-03-03,2.0,1.0,0.0,TQQQ,100.40500155791622
+Current strategy: 100% TQQQ risk-on,current_tqqq,2020-09-04,2.0,0.0,0.0,VOO,78.51699642924987
+Current strategy: 100% TQQQ risk-on,current_tqqq,2022-02-01,2.0,1.0,0.0,TQQQ,85.81570751727384
+Current strategy: 100% TQQQ risk-on,current_tqqq,2023-12-14,2.0,0.0,0.0,VOO,29.79996565605512
+Current strategy: 100% TQQQ risk-on,current_tqqq,2025-05-13,2.0,1.0,0.0,TQQQ,79.40017087759472
+Current strategy: 100% TQQQ risk-on,current_tqqq,2025-10-13,2.0,0.0,0.0,VOO,46.99001420573944
+Current strategy: 100% TQQQ risk-on,current_tqqq,2026-04-09,2.0,1.0,0.0,TQQQ,72.78170808514824
+Current strategy: 100% TQQQ risk-on,current_tqqq,2026-06-08,2.0,0.0,0.0,VOO,69.8382021642466
+Entry-locked TQQQ target 60%,entry_target_60,2011-06-24,2.0,1.0,0.0,TQQQ,54.6964755574319
+Entry-locked TQQQ target 60%,entry_target_60,2012-04-17,2.0,0.0,0.0,VOO,42.52044148335713
+Entry-locked TQQQ target 60%,entry_target_60,2012-11-20,2.0,1.0,0.0,TQQQ,56.483964305748025
+Entry-locked TQQQ target 60%,entry_target_60,2013-04-19,2.0,0.0,0.0,VOO,50.125053786217855
+Entry-locked TQQQ target 60%,entry_target_60,2014-10-22,1.7655853046862833,0.8827926523431416,0.0,TQQQ,67.9661298049386
+Entry-locked TQQQ target 60%,entry_target_60,2014-12-16,1.7655853046862833,0.0,0.0,VOO,34.07276281811452
+Entry-locked TQQQ target 60%,entry_target_60,2015-10-26,1.9609659073763002,0.9804829536881501,0.0,TQQQ,61.19433262384227
+Entry-locked TQQQ target 60%,entry_target_60,2016-04-19,1.9609659073763002,0.0,0.0,VOO,38.87126087160927
+Entry-locked TQQQ target 60%,entry_target_60,2018-11-08,1.169085044604712,0.584542522302356,0.0,TQQQ,102.64437181349291
+Entry-locked TQQQ target 60%,entry_target_60,2019-05-14,1.169085044604712,0.0,0.0,VOO,50.20878674772019
+Entry-locked TQQQ target 60%,entry_target_60,2020-03-03,1.195159585060918,0.597579792530459,0.0,TQQQ,100.40500155791622
+Entry-locked TQQQ target 60%,entry_target_60,2020-09-04,1.195159585060918,0.0,0.0,VOO,78.51699642924987
+Entry-locked TQQQ target 60%,entry_target_60,2022-02-01,1.398345401695199,0.6991727008475995,0.0,TQQQ,85.81570751727384
+Entry-locked TQQQ target 60%,entry_target_60,2023-12-14,1.398345401695199,0.0,0.0,VOO,29.79996565605512
+Entry-locked TQQQ target 60%,entry_target_60,2025-05-13,1.5113317600411085,0.7556658800205542,0.0,TQQQ,79.40017087759472
+Entry-locked TQQQ target 60%,entry_target_60,2025-10-13,1.5113317600411085,0.0,0.0,VOO,46.99001420573944
+Entry-locked TQQQ target 60%,entry_target_60,2026-04-09,1.6487659215088837,0.8243829607544418,0.0,TQQQ,72.78170808514824
+Entry-locked TQQQ target 60%,entry_target_60,2026-06-08,1.6487659215088837,0.0,0.0,VOO,69.8382021642466
+Entry-locked TQQQ target 50%,entry_target_50,2011-06-24,1.82827136448671,0.914135682243355,0.0,TQQQ,54.6964755574319
+Entry-locked TQQQ target 50%,entry_target_50,2012-04-17,1.82827136448671,0.0,0.0,VOO,42.52044148335713
+Entry-locked TQQQ target 50%,entry_target_50,2012-11-20,1.7704139790666855,0.8852069895333428,0.0,TQQQ,56.483964305748025
+Entry-locked TQQQ target 50%,entry_target_50,2013-04-19,1.7704139790666855,0.0,0.0,VOO,50.125053786217855
+Entry-locked TQQQ target 50%,entry_target_50,2014-10-22,1.4713210872385694,0.7356605436192847,0.0,TQQQ,67.9661298049386
+Entry-locked TQQQ target 50%,entry_target_50,2014-12-16,1.4713210872385694,0.0,0.0,VOO,34.07276281811452
+Entry-locked TQQQ target 50%,entry_target_50,2015-10-26,1.6341382561469169,0.8170691280734584,0.0,TQQQ,61.19433262384227
+Entry-locked TQQQ target 50%,entry_target_50,2016-04-19,1.6341382561469169,0.0,0.0,VOO,38.87126087160927
+Entry-locked TQQQ target 50%,entry_target_50,2018-11-08,0.9742375371705934,0.4871187685852967,0.0,TQQQ,102.64437181349291
+Entry-locked TQQQ target 50%,entry_target_50,2019-05-14,0.9742375371705934,0.0,0.0,VOO,50.20878674772019
+Entry-locked TQQQ target 50%,entry_target_50,2020-03-03,0.9959663208840985,0.4979831604420492,0.0,TQQQ,100.40500155791622
+Entry-locked TQQQ target 50%,entry_target_50,2020-09-04,0.9959663208840985,0.0,0.0,VOO,78.51699642924987
+Entry-locked TQQQ target 50%,entry_target_50,2022-02-01,1.1652878347459994,0.5826439173729997,0.0,TQQQ,85.81570751727384
+Entry-locked TQQQ target 50%,entry_target_50,2023-12-14,1.1652878347459994,0.0,0.0,VOO,29.79996565605512
+Entry-locked TQQQ target 50%,entry_target_50,2025-05-13,1.2594431333675904,0.6297215666837952,0.0,TQQQ,79.40017087759472
+Entry-locked TQQQ target 50%,entry_target_50,2025-10-13,1.2594431333675904,0.0,0.0,VOO,46.99001420573944
+Entry-locked TQQQ target 50%,entry_target_50,2026-04-09,1.373971601257403,0.6869858006287015,0.0,TQQQ,72.78170808514824
+Entry-locked TQQQ target 50%,entry_target_50,2026-06-08,1.373971601257403,0.0,0.0,VOO,69.8382021642466
+Entry-locked TQQQ target 40%,entry_target_40,2011-06-24,1.4626170915893681,0.7313085457946841,0.0,TQQQ,54.6964755574319
+Entry-locked TQQQ target 40%,entry_target_40,2012-04-17,1.4626170915893681,0.0,0.0,VOO,42.52044148335713
+Entry-locked TQQQ target 40%,entry_target_40,2012-11-20,1.4163311832533485,0.7081655916266743,0.0,TQQQ,56.483964305748025
+Entry-locked TQQQ target 40%,entry_target_40,2013-04-19,1.4163311832533485,0.0,0.0,VOO,50.125053786217855
+Entry-locked TQQQ target 40%,entry_target_40,2014-10-22,1.1770568697908557,0.5885284348954278,0.0,TQQQ,67.9661298049386
+Entry-locked TQQQ target 40%,entry_target_40,2014-12-16,1.1770568697908557,0.0,0.0,VOO,34.07276281811452
+Entry-locked TQQQ target 40%,entry_target_40,2015-10-26,1.3073106049175336,0.6536553024587668,0.0,TQQQ,61.19433262384227
+Entry-locked TQQQ target 40%,entry_target_40,2016-04-19,1.3073106049175336,0.0,0.0,VOO,38.87126087160927
+Entry-locked TQQQ target 40%,entry_target_40,2018-11-08,0.7793900297364749,0.3896950148682374,0.0,TQQQ,102.64437181349291
+Entry-locked TQQQ target 40%,entry_target_40,2019-05-14,0.7793900297364749,0.0,0.0,VOO,50.20878674772019
+Entry-locked TQQQ target 40%,entry_target_40,2020-03-03,0.7967730567072788,0.3983865283536394,0.0,TQQQ,100.40500155791622
+Entry-locked TQQQ target 40%,entry_target_40,2020-09-04,0.7967730567072788,0.0,0.0,VOO,78.51699642924987
+Entry-locked TQQQ target 40%,entry_target_40,2022-02-01,0.9322302677967995,0.46611513389839976,0.0,TQQQ,85.81570751727384
+Entry-locked TQQQ target 40%,entry_target_40,2023-12-14,0.9322302677967995,0.0,0.0,VOO,29.79996565605512
+Entry-locked TQQQ target 40%,entry_target_40,2025-05-13,1.0075545066940723,0.5037772533470362,0.0,TQQQ,79.40017087759472
+Entry-locked TQQQ target 40%,entry_target_40,2025-10-13,1.0075545066940723,0.0,0.0,VOO,46.99001420573944
+Entry-locked TQQQ target 40%,entry_target_40,2026-04-09,1.0991772810059226,0.5495886405029613,0.0,TQQQ,72.78170808514824
+Entry-locked TQQQ target 40%,entry_target_40,2026-06-08,1.0991772810059226,0.0,0.0,VOO,69.8382021642466
+Entry-locked TQQQ target 30%,entry_target_30,2011-06-24,1.096962818692026,0.548481409346013,0.0,TQQQ,54.6964755574319
+Entry-locked TQQQ target 30%,entry_target_30,2012-04-17,1.096962818692026,0.0,0.0,VOO,42.52044148335713
+Entry-locked TQQQ target 30%,entry_target_30,2012-11-20,1.0622483874400113,0.5311241937200056,0.0,TQQQ,56.483964305748025
+Entry-locked TQQQ target 30%,entry_target_30,2013-04-19,1.0622483874400113,0.0,0.0,VOO,50.125053786217855
+Entry-locked TQQQ target 30%,entry_target_30,2014-10-22,0.8827926523431415,0.4413963261715708,0.0,TQQQ,67.9661298049386
+Entry-locked TQQQ target 30%,entry_target_30,2014-12-16,0.8827926523431415,0.0,0.0,VOO,34.07276281811452
+Entry-locked TQQQ target 30%,entry_target_30,2015-10-26,0.9804829536881501,0.49024147684407504,0.0,TQQQ,61.19433262384227
+Entry-locked TQQQ target 30%,entry_target_30,2016-04-19,0.9804829536881501,0.0,0.0,VOO,38.87126087160927
+Entry-locked TQQQ target 30%,entry_target_30,2018-11-08,0.5845425223023559,0.292271261151178,0.0,TQQQ,102.64437181349291
+Entry-locked TQQQ target 30%,entry_target_30,2019-05-14,0.5845425223023559,0.0,0.0,VOO,50.20878674772019
+Entry-locked TQQQ target 30%,entry_target_30,2020-03-03,0.5975797925304591,0.2987898962652295,0.0,TQQQ,100.40500155791622
+Entry-locked TQQQ target 30%,entry_target_30,2020-09-04,0.5975797925304591,0.0,0.0,VOO,78.51699642924987
+Entry-locked TQQQ target 30%,entry_target_30,2022-02-01,0.6991727008475994,0.34958635042379976,0.0,TQQQ,85.81570751727384
+Entry-locked TQQQ target 30%,entry_target_30,2023-12-14,0.6991727008475994,0.0,0.0,VOO,29.79996565605512
+Entry-locked TQQQ target 30%,entry_target_30,2025-05-13,0.7556658800205542,0.3778329400102771,0.0,TQQQ,79.40017087759472
+Entry-locked TQQQ target 30%,entry_target_30,2025-10-13,0.7556658800205542,0.0,0.0,VOO,46.99001420573944
+Entry-locked TQQQ target 30%,entry_target_30,2026-04-09,0.8243829607544417,0.4121914803772209,0.0,TQQQ,72.78170808514824
+Entry-locked TQQQ target 30%,entry_target_30,2026-06-08,0.8243829607544417,0.0,0.0,VOO,69.8382021642466
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2011-06-24,2.0,1.0,0.0,TQQQ,54.6964755574319
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2012-04-17,2.0,0.0,0.0,VOO,42.52044148335713
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2012-11-20,2.0,1.0,0.0,TQQQ,56.483964305748025
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2013-04-19,2.0,0.0,0.0,VOO,50.125053786217855
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2014-10-22,1.0,0.5,0.0,TQQQ,67.9661298049386
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2014-12-16,1.0,0.0,0.0,VOO,34.07276281811452
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2015-10-26,1.0,0.5,0.0,TQQQ,61.19433262384227
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2016-04-19,1.0,0.0,0.0,VOO,38.87126087160927
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2018-11-08,1.0,0.5,0.0,TQQQ,102.64437181349291
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2019-05-14,1.0,0.0,0.0,VOO,50.20878674772019
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2020-03-03,1.0,0.5,0.0,TQQQ,100.40500155791622
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2020-09-04,1.0,0.0,0.0,VOO,78.51699642924987
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2022-02-01,1.0,0.5,0.0,TQQQ,85.81570751727384
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2023-12-14,1.0,0.0,0.0,VOO,29.79996565605512
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2025-05-13,1.0,0.5,0.0,TQQQ,79.40017087759472
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2025-10-13,1.0,0.0,0.0,VOO,46.99001420573944
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2026-04-09,1.0,0.5,0.0,TQQQ,72.78170808514824
+Entry-locked half-size above 60% volatility,entry_high_vol_half,2026-06-08,1.0,0.0,0.0,VOO,69.8382021642466
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2011-06-24,2.0,1.0,0.0,TQQQ,54.6964755574319
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2012-04-17,2.0,0.0,0.0,VOO,42.52044148335713
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2012-11-20,2.0,1.0,0.0,TQQQ,56.483964305748025
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2013-04-19,2.0,0.0,0.0,VOO,50.125053786217855
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2014-10-22,2.0,0.0,1.0,QLD,67.9661298049386
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2014-12-16,2.0,0.0,0.0,VOO,34.07276281811452
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2015-10-26,2.0,0.0,1.0,QLD,61.19433262384227
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2016-04-19,2.0,0.0,0.0,VOO,38.87126087160927
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2018-11-08,2.0,0.0,1.0,QLD,102.64437181349291
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2019-05-14,2.0,0.0,0.0,VOO,50.20878674772019
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2020-03-03,2.0,0.0,1.0,QLD,100.40500155791622
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2020-09-04,2.0,0.0,0.0,VOO,78.51699642924987
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2022-02-01,2.0,0.0,1.0,QLD,85.81570751727384
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2023-12-14,2.0,0.0,0.0,VOO,29.79996565605512
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2025-05-13,2.0,0.0,1.0,QLD,79.40017087759472
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2025-10-13,2.0,0.0,0.0,VOO,46.99001420573944
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2026-04-09,2.0,0.0,1.0,QLD,72.78170808514824
+Entry-locked TQQQ/QLD volatility ladder,entry_leverage_ladder,2026-06-08,2.0,0.0,0.0,VOO,69.8382021642466
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2011-06-24,1.0,0.5,0.0,TQQQ,54.6964755574319
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2012-04-17,1.0,0.0,0.0,VOO,42.52044148335713
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2012-11-20,1.0,0.5,0.0,TQQQ,56.483964305748025
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2013-04-19,1.0,0.0,0.0,VOO,50.125053786217855
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2014-10-22,1.0,0.5,0.0,TQQQ,67.9661298049386
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2014-12-16,1.0,0.0,0.0,VOO,34.07276281811452
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2015-10-26,1.0,0.5,0.0,TQQQ,61.19433262384227
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2016-04-19,1.0,0.0,0.0,VOO,38.87126087160927
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2018-11-08,1.0,0.5,0.0,TQQQ,102.64437181349291
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2019-05-14,1.0,0.0,0.0,VOO,50.20878674772019
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2020-03-03,1.0,0.5,0.0,TQQQ,100.40500155791622
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2020-09-04,1.0,0.0,0.0,VOO,78.51699642924987
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2022-02-01,1.0,0.5,0.0,TQQQ,85.81570751727384
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2023-12-14,1.0,0.0,0.0,VOO,29.79996565605512
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2025-05-13,1.0,0.5,0.0,TQQQ,79.40017087759472
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2025-10-13,1.0,0.0,0.0,VOO,46.99001420573944
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2026-04-09,1.0,0.5,0.0,TQQQ,72.78170808514824
+Entry-locked 50% TQQQ / 50% VOO,entry_half,2026-06-08,1.0,0.0,0.0,VOO,69.8382021642466
