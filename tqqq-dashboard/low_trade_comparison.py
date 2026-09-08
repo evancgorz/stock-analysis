@@ -121,6 +121,8 @@ def simulate_entry_locked_policy(data: pd.DataFrame, reference_frame: pd.DataFra
         if i > 0:
             previous = data.index[i - 1]
             for asset, weight in previous_weights.items():
+                if weight == 0.0:
+                    continue
                 gap_return += weight * (_asset_return(data, asset, "open", index) / _asset_return(data, asset, "close", previous) - 1.0)
             equity *= 1.0 + gap_return
 
@@ -131,6 +133,7 @@ def simulate_entry_locked_policy(data: pd.DataFrame, reference_frame: pd.DataFra
         intraday_return = sum(
             weight * (_asset_return(data, asset, "close", index) / _asset_return(data, asset, "open", index) - 1.0)
             for asset, weight in weights.items()
+            if weight != 0.0
         )
         equity *= 1.0 + intraday_return
         full_day_return = (1.0 + gap_return) * (1.0 + cost_return) * (1.0 + intraday_return) - 1.0

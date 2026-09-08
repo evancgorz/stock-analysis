@@ -4,7 +4,7 @@ This Streamlit app focuses on a rules-based TQQQ strategy and the supporting ana
 
 ## Pages
 
-- `Home`: main strategy dashboard
+- `Cockpit`: low-attention operating view with one confirmed action, target allocation, timing, and next trigger
 - `Current Markets`: live snapshot for TQQQ, SPY, and QQQ
 - `Grid Search`: sweep SMA windows and matched thresholds to compare win rate, Sharpe ratio, and strategy vs VOO return
 
@@ -34,6 +34,7 @@ The strategy account is always invested in exactly one asset: `VOO` or `TQQQ`.
 - `research_runner.py`: reproducible report generator and experiment register
 - `strategy_comparison.py`: fixed-rule volatility-sizing, QLD, and risk-ladder comparison
 - `low_trade_comparison.py`: entry-locked sizing and low-attention exit-rule comparison
+- `operating_policy.py`: frozen-baseline and low-trading cockpit policy definitions and allocation plans
 - `../research_reports/low_trade_comparison/low_trade_comparison.md`: latest low-trading research report
 - `PAPER_VALIDATION.md`: prospective operational validation protocol
 - `STRATEGY_SPEC.md`: canonical account, signal, exit, and execution rules

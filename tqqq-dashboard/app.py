@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(
-    page_title="Strategy Lab",
+    page_title="TQQQ Strategy Cockpit",
     page_icon="bar_chart",
     layout="wide",
 )
@@ -14,7 +14,7 @@ from robustness_view import render as render_robustness
 
 navigation = st.navigation(
     [
-        st.Page(render_home, title="Home", url_path="home", default=True),
+        st.Page(render_home, title="Cockpit", url_path="home", default=True),
         st.Page(render_current_markets, title="Current Markets", url_path="current-markets"),
         st.Page(render_exit_tests, title="Exit Tests", url_path="exit-tests"),
         st.Page(render_grid_search, title="Grid Search", url_path="grid-search"),

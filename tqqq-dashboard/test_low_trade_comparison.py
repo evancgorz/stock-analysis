@@ -13,8 +13,6 @@ class LowTradeComparisonTests(unittest.TestCase):
             {
                 "tqqq_open": close - 0.1,
                 "tqqq_close": close,
-                "qld_open": close - 0.05,
-                "qld_close": close,
                 "voo_open": close + 299.9,
                 "voo_close": close + 300,
             },

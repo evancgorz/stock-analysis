@@ -38,9 +38,18 @@ def _append(entry: dict[str, Any]) -> dict[str, Any]:
 def record_recommendation(entry: dict[str, Any]) -> dict[str, Any]:
     session = entry.get("session")
     action = entry.get("action")
+    policy_key = entry.get("policy_key", "baseline")
     existing = _read_entries()
-    if any(item.get("type") == "recommendation" and item.get("session") == session and item.get("action") == action for item in existing):
-        return next(item for item in existing if item.get("type") == "recommendation" and item.get("session") == session and item.get("action") == action)
+    matches = [
+        item
+        for item in existing
+        if item.get("type") == "recommendation"
+        and item.get("session") == session
+        and item.get("action") == action
+        and item.get("policy_key", "baseline") == policy_key
+    ]
+    if matches:
+        return matches[0]
     return _append({"type": "recommendation", **entry})
 
 
