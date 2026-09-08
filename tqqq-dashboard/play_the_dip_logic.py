@@ -10,6 +10,8 @@ import yfinance as yf
 
 INITIAL_CAPITAL = 100_000.0
 SP500_REFERENCE_TICKER = "^SP500TR"
+DEFENSIVE_ASSET = "VOO"
+STRATEGY_VERSION = "1.0"
 
 
 @dataclass
@@ -26,7 +28,7 @@ class Trade:
 @st.cache_data(show_spinner=False, ttl=3600)
 def download_market_data(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
     raw = yf.download(
-        ["TQQQ", "VOO", SP500_REFERENCE_TICKER],
+        ["TQQQ", "VOO", "QQQ", SP500_REFERENCE_TICKER],
         start=start_date.strftime("%Y-%m-%d"),
         end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
         auto_adjust=True,
@@ -37,9 +39,18 @@ def download_market_data(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd
         raise ValueError("No data returned from yfinance.")
 
     closes = raw["Close"].rename(
-        columns={"TQQQ": "tqqq_close", "VOO": "voo_close", SP500_REFERENCE_TICKER: "spx_close"}
+        columns={"TQQQ": "tqqq_close", "VOO": "voo_close", "QQQ": "qqq_close", SP500_REFERENCE_TICKER: "spx_close"}
     )
-    data = closes.dropna().copy()
+    opens = raw["Open"].rename(
+        columns={"TQQQ": "tqqq_open", "VOO": "voo_open", "QQQ": "qqq_open", SP500_REFERENCE_TICKER: "spx_open"}
+    )
+    highs = raw["High"].rename(
+        columns={"TQQQ": "tqqq_high", "VOO": "voo_high", "QQQ": "qqq_high", SP500_REFERENCE_TICKER: "spx_high"}
+    )
+    lows = raw["Low"].rename(
+        columns={"TQQQ": "tqqq_low", "VOO": "voo_low", "QQQ": "qqq_low", SP500_REFERENCE_TICKER: "spx_low"}
+    )
+    data = pd.concat([opens, highs, lows, closes], axis=1).dropna().copy()
     data.index = pd.to_datetime(data.index)
     return data.sort_index()
 
@@ -72,8 +83,11 @@ def build_play_the_dip_frame(
     sma_window: int,
     upper_band: float,
     lower_band: float,
-    defensive_asset: str,
+    defensive_asset: str = DEFENSIVE_ASSET,
 ) -> pd.DataFrame:
+    if defensive_asset != DEFENSIVE_ASSET:
+        raise ValueError("This strategy is always invested in VOO when it is not holding TQQQ.")
+
     frame = data.copy()
     frame["spx_sma"] = frame["spx_close"].rolling(sma_window).mean()
     frame["distance_to_sma"] = frame["spx_close"] / frame["spx_sma"] - 1.0
@@ -145,14 +159,39 @@ def build_play_the_dip_frame(
     ready["phase"] = phases
     ready["event"] = events
     ready["tqqq_trailing_stop_level"] = trailing_stop_levels
+    # A close signal on day t becomes the position held at the next open.
+    # The prior position earns the overnight gap; the new position earns the
+    # next day's open-to-close return. This avoids crediting the strategy with
+    # a full close-to-close return for a trade that did not exist at the close.
     ready["position"] = ready["signal"].shift(1).fillna(0.0)
+    previous_position = ready["position"].shift(1).fillna(0.0)
     ready["tqqq_return"] = ready["tqqq_close"].pct_change().fillna(0.0)
     ready["voo_return"] = ready["voo_close"].pct_change().fillna(0.0)
     ready["spx_return"] = ready["spx_close"].pct_change().fillna(0.0)
-    ready["defensive_return"] = 0.0 if defensive_asset == "Cash" else ready["voo_return"]
-    ready["active_asset"] = np.where(ready["position"] == 1.0, "TQQQ", defensive_asset)
-    ready["strategy_return"] = ready["position"] * ready["tqqq_return"]
-    ready["strategy_return"] += (1.0 - ready["position"]) * ready["defensive_return"]
+    ready["tqqq_overnight_return"] = ready["tqqq_open"] / ready["tqqq_close"].shift(1) - 1.0
+    ready["voo_overnight_return"] = ready["voo_open"] / ready["voo_close"].shift(1) - 1.0
+    ready["tqqq_intraday_return"] = ready["tqqq_close"] / ready["tqqq_open"] - 1.0
+    ready["voo_intraday_return"] = ready["voo_close"] / ready["voo_open"] - 1.0
+    ready[["tqqq_overnight_return", "voo_overnight_return"]] = ready[
+        ["tqqq_overnight_return", "voo_overnight_return"]
+    ].fillna(0.0)
+    ready["strategy_overnight_return"] = np.where(
+        previous_position == 1.0,
+        ready["tqqq_overnight_return"],
+        ready["voo_overnight_return"],
+    )
+    ready["strategy_intraday_return"] = np.where(
+        ready["position"] == 1.0,
+        ready["tqqq_intraday_return"],
+        ready["voo_intraday_return"],
+    )
+    ready["defensive_return"] = ready["voo_return"]
+    ready["active_asset"] = np.where(ready["position"] == 1.0, "TQQQ", DEFENSIVE_ASSET)
+    ready["strategy_return"] = (
+        (1.0 + ready["strategy_overnight_return"])
+        * (1.0 + ready["strategy_intraday_return"])
+        - 1.0
+    )
     ready["buy_hold_return"] = ready["tqqq_return"]
     ready["voo_buy_hold_return"] = ready["voo_return"]
     ready["spx_buy_hold_return"] = ready["spx_return"]
@@ -184,26 +223,33 @@ def extract_trades(frame: pd.DataFrame) -> pd.DataFrame:
 
     trades = []
     for entry_date, exit_date in zip(entries, exits):
-        entry_price = float(frame.loc[entry_date, "tqqq_close"])
-        exit_price = float(frame.loc[exit_date, "tqqq_close"])
+        entry_price = float(frame.loc[entry_date, "tqqq_open"])
         has_real_exit = position_changes.loc[exit_date] == -1.0
-        exit_event = frame.loc[exit_date, "event"]
+        entry_index = frame.index.get_loc(entry_date)
+        exit_index = frame.index.get_loc(exit_date)
+        entry_signal_date = frame.index[max(0, entry_index - 1)]
+        exit_signal_date = frame.index[max(0, exit_index - 1)]
+        exit_event = frame.loc[exit_signal_date, "event"]
         current_return_pct = latest_price / entry_price - 1.0
         estimated_stop_return_pct = (
             latest_stop_level / entry_price - 1.0 if pd.notna(latest_stop_level) else np.nan
         )
         if has_real_exit:
+            exit_price = float(frame.loc[exit_date, "tqqq_open"])
             exit_reason = str(exit_event or "Exit signal")
             status = "Closed"
             current_return_pct = exit_price / entry_price - 1.0
             estimated_stop_return_pct = np.nan
         else:
+            exit_price = latest_price
             exit_reason = "Open trade as of selected end date"
             status = "Open"
         trades.append(
             {
                 "Status": status,
+                "Entry signal date": entry_signal_date.date(),
                 "Entry date": entry_date.date(),
+                "Exit signal date": exit_signal_date.date() if has_real_exit else None,
                 "Exit date": exit_date.date(),
                 "Entry price": round(entry_price, 2),
                 "Exit price": round(exit_price, 2),

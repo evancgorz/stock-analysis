@@ -12,12 +12,14 @@ This repo contains a Streamlit stock-analysis app focused on a `Play the Dip` TQ
 
 The current strategy:
 
-- uses the S&P 500 (`^GSPC`) as the regime signal
+- uses the S&P 500 total-return index (`^SP500TR`) as the regime signal
 - calculates a rolling SMA window
 - enters TQQQ when the S&P 500 rises above the upper threshold relative to its SMA
-- exits on a fresh S&P 500 all-time high
+- activates a TQQQ close-based trailing exit after a fresh S&P 500 all-time high
 - waits for the S&P 500 to drop below the lower threshold before re-arming the next buy
-- optionally rotates off-regime exposure into `Cash` or `VOO`
+- rotates off-regime exposure into `VOO` (the strategy never uses cash)
+
+The research baseline is evaluated against continuous VOO during the same risk-on intervals and includes next-session execution, paired episode ledgers, cost/delay matrices, walk-forward folds, bounded alternatives, and an explicit paper-validation gate.
 
 ## Project Layout
 

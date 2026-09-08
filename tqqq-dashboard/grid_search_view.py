@@ -6,12 +6,10 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from play_the_dip_logic import (
-    INITIAL_CAPITAL,
-    build_play_the_dip_frame,
+    DEFENSIVE_ASSET,
     download_market_data,
-    extract_trades,
-    sharpe_ratio,
 )
+from research_engine import ResearchConfig, score_window, simulate_strategy
 from state_store import load_page_state, save_page_state
 
 
@@ -26,7 +24,7 @@ PAGE_DEFAULTS = {
     "threshold_start_pct": 0.5,
     "threshold_end_pct": 3.0,
     "threshold_step_pct": 0.5,
-    "defensive_asset": "Cash",
+    "defensive_asset": "VOO",
 }
 
 
@@ -67,31 +65,29 @@ def run_grid_search(
     for sma_window in sma_values:
         for threshold_pct in threshold_values:
             threshold = threshold_pct / 100
-            frame = build_play_the_dip_frame(
+            result = simulate_strategy(
                 market_data,
-                int(sma_window),
-                threshold,
-                -threshold,
-                defensive_asset,
+                ResearchConfig(
+                    sma_window=int(sma_window),
+                    upper_band=threshold,
+                    lower_band=-threshold,
+                    cost_bps_per_leg=5.0,
+                ),
             )
-            if frame.empty:
-                continue
-
-            trades = extract_trades(frame)
-            strategy_return = frame["strategy_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
-            spx_return = frame["spx_buy_hold_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
-            win_rate = (trades["Return %"] > 0).mean() if not trades.empty else 0.0
+            score = score_window(result)
+            closed = result.episodes.loc[result.episodes["Status"] == "Closed"]
+            win_rate = (closed["Strategy net return %"] > 0).mean() if not closed.empty else 0.0
 
             rows.append(
                 {
                     "sma_window": int(sma_window),
                     "threshold_pct": float(threshold_pct),
                     "win_rate_pct": win_rate * 100,
-                    "strategy_return_pct": strategy_return * 100,
-                    "spx_return_pct": spx_return * 100,
-                    "strategy_vs_spx_pct": (strategy_return - spx_return) * 100,
-                    "sharpe_ratio": sharpe_ratio(frame["strategy_return"]),
-                    "trade_count": len(trades),
+                    "strategy_return_pct": score["Return %"],
+                    "voo_return_pct": score["VOO return %"],
+                    "strategy_vs_voo_pct": score["Excess vs VOO %"],
+                    "sharpe_ratio": score["Sharpe"],
+                    "trade_count": len(closed),
                 }
             )
 
@@ -134,11 +130,8 @@ def render() -> None:
             value=float(saved_inputs["threshold_step_pct"]),
             step=0.1,
         )
-        defensive_asset = st.selectbox(
-            "Off-regime allocation",
-            options=["Cash", "VOO"],
-            index=0 if saved_inputs["defensive_asset"] == "Cash" else 1,
-        )
+        defensive_asset = DEFENSIVE_ASSET
+        st.caption("Off-regime allocation: VOO")
         if st.button("Refresh data"):
             st.cache_data.clear()
 
@@ -192,14 +185,14 @@ def render() -> None:
         st.warning("No valid combinations were produced for the selected ranges.")
         return
 
-    best_vs_spx = results.loc[results["strategy_vs_spx_pct"].idxmax()]
+    best_vs_voo = results.loc[results["strategy_vs_voo_pct"].idxmax()]
     best_win_rate = results.loc[results["win_rate_pct"].idxmax()]
     best_sharpe = results.loc[results["sharpe_ratio"].idxmax()]
 
     metrics = st.columns(6)
-    metrics[0].metric("Best vs S&P 500", f"{best_vs_spx['strategy_vs_spx_pct']:.2f}%")
-    metrics[1].metric("Best SMA", str(int(best_vs_spx["sma_window"])))
-    metrics[2].metric("Best threshold", f"{best_vs_spx['threshold_pct']:.2f}%")
+    metrics[0].metric("Best vs VOO", f"{best_vs_voo['strategy_vs_voo_pct']:.2f}%")
+    metrics[1].metric("Best SMA", str(int(best_vs_voo["sma_window"])))
+    metrics[2].metric("Best threshold", f"{best_vs_voo['threshold_pct']:.2f}%")
     metrics[3].metric("Best win rate", f"{best_win_rate['win_rate_pct']:.2f}%")
     metrics[4].metric("Best Sharpe", f"{best_sharpe['sharpe_ratio']:.2f}")
     metrics[5].metric(
@@ -209,16 +202,16 @@ def render() -> None:
 
     left, middle, right = st.columns(3)
     with left:
-        st.plotly_chart(build_heatmap(results, "strategy_vs_spx_pct", "Strategy vs S&P 500 Return (%)"), use_container_width=True)
+        st.plotly_chart(build_heatmap(results, "strategy_vs_voo_pct", "Strategy vs VOO Return (%)"), use_container_width=True)
     with middle:
         st.plotly_chart(build_heatmap(results, "win_rate_pct", "Win Rate (%)"), use_container_width=True)
     with right:
         st.plotly_chart(build_heatmap(results, "sharpe_ratio", "Sharpe Ratio"), use_container_width=True)
 
-    st.subheader("Top combinations by strategy vs S&P 500")
-    top_results = results.sort_values(["strategy_vs_spx_pct", "win_rate_pct"], ascending=[False, False]).head(20).copy()
+    st.subheader("Top combinations by strategy vs VOO")
+    top_results = results.sort_values(["strategy_vs_voo_pct", "win_rate_pct"], ascending=[False, False]).head(20).copy()
     st.dataframe(top_results, use_container_width=True, hide_index=True)
 
     st.subheader("Top combinations by Sharpe ratio")
-    top_sharpe = results.sort_values(["sharpe_ratio", "strategy_vs_spx_pct"], ascending=[False, False]).head(20).copy()
+    top_sharpe = results.sort_values(["sharpe_ratio", "strategy_vs_voo_pct"], ascending=[False, False]).head(20).copy()
     st.dataframe(top_sharpe, use_container_width=True, hide_index=True)

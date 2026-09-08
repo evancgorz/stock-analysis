@@ -9,6 +9,7 @@ from exit_tests_view import render as render_exit_tests
 from grid_search_view import render as render_grid_search
 from home_view import render as render_home
 from current_markets_view import render as render_current_markets
+from robustness_view import render as render_robustness
 
 
 navigation = st.navigation(
@@ -17,6 +18,7 @@ navigation = st.navigation(
         st.Page(render_current_markets, title="Current Markets", url_path="current-markets"),
         st.Page(render_exit_tests, title="Exit Tests", url_path="exit-tests"),
         st.Page(render_grid_search, title="Grid Search", url_path="grid-search"),
+        st.Page(render_robustness, title="Robustness", url_path="robustness"),
     ]
 )
 navigation.run()

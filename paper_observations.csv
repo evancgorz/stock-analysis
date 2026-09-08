@@ -1,0 +1,1 @@
+signal_session,notification_time_utc,action,expected_execution_window,order_submission_time_utc,order_type,actual_fill_time_utc,actual_fill_price,asset_sold,asset_bought,slippage_bps,miss_reason,notes

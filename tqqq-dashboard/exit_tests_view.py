@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from play_the_dip_logic import (
-    INITIAL_CAPITAL,
-    annualized_return,
+    DEFENSIVE_ASSET,
     download_market_data,
-    extract_trades,
     format_pct,
-    sharpe_ratio,
 )
+from research_engine import ResearchConfig, score_window, simulate_strategy
 from state_store import load_page_state, save_page_state
 
 
@@ -24,7 +21,7 @@ SMA_WINDOW = 200
 UPPER_BAND = 0.01
 LOWER_BAND = -0.01
 PAGE_DEFAULTS = {
-    "defensive_asset": "Cash",
+    "defensive_asset": "VOO",
 }
 
 EXIT_RULES: dict[str, str] = {
@@ -32,120 +29,6 @@ EXIT_RULES: dict[str, str] = {
     "tqqq_trailing_10_immediate": "TQQQ 10% trailing stop from entry",
     "tqqq_trailing_10_after_ath": "SPX ATH then TQQQ 10% trailing stop",
 }
-
-
-def _rule_triggered(
-    rule_key: str,
-    row: pd.Series,
-    trade_state: dict[str, float | int],
-) -> tuple[bool, str]:
-    if rule_key == "sell_at_ath":
-        return bool(row["is_new_ath"]), "Sold on new S&P 500 ATH"
-    if rule_key == "tqqq_trailing_10_immediate":
-        stop_level = float(trade_state["peak_tqqq"]) * 0.90
-        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% from its post-entry high"
-    if rule_key == "tqqq_trailing_10_after_ath":
-        if not bool(trade_state["ath_reached"]):
-            return False, ""
-        stop_level = float(trade_state["peak_tqqq"]) * 0.90
-        return bool(row["tqqq_close"] <= stop_level), "TQQQ fell 10% after the S&P 500 reached a new ATH"
-    raise ValueError(f"Unsupported exit rule: {rule_key}")
-
-
-def build_exit_test_frame(data: pd.DataFrame, defensive_asset: str, rule_key: str) -> pd.DataFrame:
-    frame = data.copy()
-    frame["spx_sma"] = frame["spx_close"].rolling(SMA_WINDOW).mean()
-    frame["spx_20_sma"] = frame["spx_close"].rolling(20).mean()
-    frame["spx_50_sma"] = frame["spx_close"].rolling(50).mean()
-    frame["distance_to_sma"] = frame["spx_close"] / frame["spx_sma"] - 1.0
-    frame["prior_ath"] = frame["spx_close"].cummax().shift(1)
-    frame["is_new_ath"] = frame["spx_close"] > frame["prior_ath"].fillna(-np.inf)
-
-    ready = frame.dropna(subset=["spx_sma"]).copy()
-
-    signals: list[float] = []
-    phases: list[str] = []
-    events: list[str] = []
-    exit_rule_names: list[str] = []
-
-    target_long = False
-    awaiting_reset = False
-    buy_armed = True
-    trade_state: dict[str, float | int] = {
-        "peak_tqqq": np.nan,
-        "peak_spx": np.nan,
-        "days_in_trade": 0,
-        "ath_reached": False,
-    }
-
-    for _, row in ready.iterrows():
-        event = ""
-        distance = float(row["distance_to_sma"])
-
-        if target_long:
-            trade_state["peak_tqqq"] = max(float(trade_state["peak_tqqq"]), float(row["tqqq_close"]))
-            trade_state["peak_spx"] = max(float(trade_state["peak_spx"]), float(row["spx_close"]))
-            trade_state["days_in_trade"] = int(trade_state["days_in_trade"]) + 1
-            if bool(row["is_new_ath"]):
-                trade_state["ath_reached"] = True
-            exit_now, exit_reason = _rule_triggered(rule_key, row, trade_state)
-            if exit_now:
-                target_long = False
-                awaiting_reset = True
-                buy_armed = False
-                event = exit_reason
-                trade_state = {
-                    "peak_tqqq": np.nan,
-                    "peak_spx": np.nan,
-                    "days_in_trade": 0,
-                    "ath_reached": False,
-                }
-        elif awaiting_reset and distance < LOWER_BAND:
-            awaiting_reset = False
-            buy_armed = True
-            event = "Reset level reached"
-        elif (not target_long) and buy_armed and distance > UPPER_BAND:
-            target_long = True
-            buy_armed = False
-            trade_state = {
-                "peak_tqqq": float(row["tqqq_close"]),
-                "peak_spx": float(row["spx_close"]),
-                "days_in_trade": 0,
-                "ath_reached": False,
-            }
-            event = "Buy level reached"
-
-        if target_long:
-            phase = "Holding TQQQ"
-        elif awaiting_reset:
-            phase = "Waiting for reset below lower band"
-        elif buy_armed:
-            phase = "Armed for next buy signal"
-        else:
-            phase = "Defensive allocation"
-
-        signals.append(1.0 if target_long else 0.0)
-        phases.append(phase)
-        events.append(event)
-        exit_rule_names.append(EXIT_RULES[rule_key])
-
-    ready["signal"] = signals
-    ready["phase"] = phases
-    ready["event"] = events
-    ready["exit_rule"] = exit_rule_names
-    ready["position"] = ready["signal"].shift(1).fillna(0.0)
-    ready["tqqq_return"] = ready["tqqq_close"].pct_change().fillna(0.0)
-    ready["voo_return"] = ready["voo_close"].pct_change().fillna(0.0)
-    ready["spx_return"] = ready["spx_close"].pct_change().fillna(0.0)
-    ready["defensive_return"] = 0.0 if defensive_asset == "Cash" else ready["voo_return"]
-    ready["active_asset"] = np.where(ready["position"] == 1.0, "TQQQ", defensive_asset)
-    ready["strategy_return"] = ready["position"] * ready["tqqq_return"]
-    ready["strategy_return"] += (1.0 - ready["position"]) * ready["defensive_return"]
-    ready["strategy_equity"] = INITIAL_CAPITAL * (1 + ready["strategy_return"]).cumprod()
-    ready["spx_buy_hold_equity"] = INITIAL_CAPITAL * (1 + ready["spx_return"]).cumprod()
-    ready["strategy_peak"] = ready["strategy_equity"].cummax()
-    ready["strategy_drawdown"] = ready["strategy_equity"] / ready["strategy_peak"] - 1.0
-    return ready
 
 
 @st.cache_data(show_spinner=False)
@@ -156,38 +39,51 @@ def run_exit_rule_analysis(start_date: str, end_date: str, defensive_asset: str)
     equity_frame = pd.DataFrame()
     trade_logs: dict[str, pd.DataFrame] = {}
 
-    for rule_key, rule_name in EXIT_RULES.items():
-        frame = build_exit_test_frame(data, defensive_asset, rule_key)
-        if frame.empty:
-            continue
+    exit_modes = {
+        "sell_at_ath": "sell_at_ath",
+        "tqqq_trailing_10_immediate": "immediate_trailing_close",
+        "tqqq_trailing_10_after_ath": "ath_trailing_close",
+    }
 
-        trades = extract_trades(frame)
+    for rule_key, rule_name in EXIT_RULES.items():
+        result = simulate_strategy(
+            data,
+            ResearchConfig(
+                exit_mode=exit_modes[rule_key],
+                cost_bps_per_leg=5.0,
+            ),
+        )
+        frame = result.frame
+        trades = result.episodes.copy()
         trade_logs[rule_name] = trades
-        total_return = frame["strategy_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
-        spx_return = frame["spx_buy_hold_equity"].iloc[-1] / INITIAL_CAPITAL - 1.0
-        win_rate = (trades["Return %"] > 0).mean() if not trades.empty else 0.0
-        avg_trade = trades["Return %"].mean() / 100 if not trades.empty else 0.0
+        score = score_window(result)
+        closed = trades.loc[trades["Status"] == "Closed"]
+        win_rate = (closed["Strategy net return %"] > 0).mean() if not closed.empty else 0.0
+        avg_trade = closed["Strategy net return %"].mean() / 100 if not closed.empty else 0.0
 
         summary_rows.append(
             {
                 "Exit approach": rule_name,
-                "Total return": format_pct(total_return),
-                "Vs S&P 500": format_pct(total_return - spx_return),
-                "Annualized return": format_pct(annualized_return(frame["strategy_equity"])),
-                "Sharpe": round(sharpe_ratio(frame["strategy_return"]), 2),
-                "Max drawdown": format_pct(frame["strategy_drawdown"].min()),
+                "Total return": format_pct(score["Return %"] / 100),
+                "Vs VOO": format_pct(score["Excess vs VOO %"] / 100),
+                "Annualized return": format_pct(score["Annualized %"] / 100),
+                "Sharpe": round(score["Sharpe"], 2),
+                "Max drawdown": format_pct(score["Max drawdown %"] / 100),
                 "Win rate": format_pct(win_rate),
                 "Average trade": format_pct(avg_trade),
-                "Trade count": int(len(trades)),
-                "Time invested": format_pct(frame["position"].mean()),
+                "Trade count": int(len(closed)),
+                "Time invested": format_pct(score["TQQQ time %"] / 100),
             }
         )
 
         equity_frame[rule_name] = frame["strategy_equity"]
 
     if not equity_frame.empty:
-        benchmark = build_exit_test_frame(data, defensive_asset, "tqqq_trailing_10_immediate")
-        equity_frame["S&P 500 Buy & Hold"] = benchmark["spx_buy_hold_equity"]
+        benchmark = simulate_strategy(
+            data,
+            ResearchConfig(exit_mode="immediate_trailing_close", cost_bps_per_leg=5.0),
+        )
+        equity_frame["VOO Buy & Hold"] = benchmark.frame["voo_equity"]
 
     summary = pd.DataFrame(summary_rows)
     return summary, equity_frame, trade_logs
@@ -198,7 +94,7 @@ def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -
         "Sell at SPX ATH": "#d99100",
         "TQQQ 10% trailing stop from entry": "#1f3b57",
         "SPX ATH then TQQQ 10% trailing stop": "#b14f29",
-        "S&P 500 Buy & Hold": "#4d4d4d",
+        "VOO Buy & Hold": "#4d4d4d",
     }
     figure = go.Figure()
     for rule_name in selected_rules:
@@ -213,14 +109,14 @@ def build_equity_figure(equity_frame: pd.DataFrame, selected_rules: list[str]) -
                 line={"width": 2.5, "color": color_map.get(rule_name, "#1f3b57")},
             )
         )
-    if "S&P 500 Buy & Hold" in equity_frame.columns:
+    if "VOO Buy & Hold" in equity_frame.columns:
         figure.add_trace(
             go.Scatter(
                 x=equity_frame.index,
-                y=equity_frame["S&P 500 Buy & Hold"],
+                y=equity_frame["VOO Buy & Hold"],
                 mode="lines",
-                name="S&P 500 Buy & Hold",
-                line={"width": 2, "dash": "dot", "color": color_map["S&P 500 Buy & Hold"]},
+                name="VOO Buy & Hold",
+                line={"width": 2, "dash": "dot", "color": color_map["VOO Buy & Hold"]},
             )
         )
     figure.update_layout(
@@ -238,18 +134,15 @@ def render() -> None:
 
     st.title("Exit Tests")
     st.caption(
-        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares three exit approaches: sell at a fresh S&P 500 all-time high, use a 10% TQQQ trailing stop from entry, or wait until the S&P 500 reaches a fresh all-time high before activating the same 10% TQQQ trailing stop."
+        "This page keeps the entry setup fixed at a 200-day SMA with a +1% buy band and -1% reset band, then compares three exit approaches against continuous VOO ownership."
     )
 
     with st.sidebar:
         st.header("Test Inputs")
         start_date = st.date_input("Start date", value=pd.Timestamp(DEFAULT_START_DATE))
         end_date = st.date_input("End date", value=pd.Timestamp(DEFAULT_END_DATE))
-        defensive_asset = st.selectbox(
-            "Off-regime allocation",
-            options=["Cash", "VOO"],
-            index=0 if saved_inputs["defensive_asset"] == "Cash" else 1,
-        )
+        defensive_asset = DEFENSIVE_ASSET
+        st.caption("Off-regime allocation: VOO")
         if st.button("Refresh data"):
             st.cache_data.clear()
 

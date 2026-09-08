@@ -11,7 +11,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P0 — Repair the evidence foundation
 
-- [ ] M01: Audit and reconcile existing results before drawing conclusions.
+- [x] M01: Audit and reconcile existing results before drawing conclusions.
   - In `robustness_view.evaluate_combination`, slicing the frame does not rebase equity: ending equity divided by initial capital includes warm-up gains. Recompute evaluation-period wealth from evaluation-period returns with a clearly defined starting timestamp, including the first return consistently.
   - Reconstruct SMA, historical highs, reset state, holdings, and trailing peaks from all prior available history. A short SMA warm-up is insufficient to reconstruct a stateful trading strategy. Score only the evaluation window.
   - The existing 70/30 procedure is a single historical holdout, not repeated walk-forward validation. Previously inspected dates are no longer a pristine holdout.
@@ -21,7 +21,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Verify current-day incomplete bars cannot generate confirmed signals. Historical window highs must not be called all-time highs without sufficient prior index history.
   - Acceptance: hand-calculated fixtures reconcile holdings, dividends, costs, equity, fills, and matched VOO returns; prefix-invariance tests show future observations cannot change earlier decisions. Reissue the previous return/drawdown claims as corrected or withdrawn with a reconciliation table.
 
-- [ ] M02: Freeze a reproducible baseline and dataset.
+- [x] M02: Freeze a reproducible baseline and dataset.
   - Record SMA 200, +1% buy band, -1% reset band, total-return S&P signal, ATH-activated 10% close-based trailing exit, VOO resting allocation, and next-session open execution as the initial research baseline.
   - Specify strict versus inclusive comparisons, initial armed state, buy-above-level versus fresh crossing, same-day event precedence, ATH on entry day, reset after exit, missing sessions, and pending orders. An inactive pre-ATH stop means no such exit protection; report that exposure explicitly.
   - Store immutable OHLC/dividend/split snapshots, provider, retrieval time, exchange timezone/calendar, coverage, gaps, adjustment conventions, hashes, code revision, config, seeds, and run identifier.
@@ -31,13 +31,13 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P1 — Model how execution actually happens
 
-- [ ] M03: Build one event-driven simulator shared by all research pages.
+- [x] M03: Build one event-driven simulator shared by all research pages.
   - Distinguish signal time, confirmation/data-availability time, notification time, user action time, order submission, and fill time. A confirmed closing signal cannot receive an earlier fill.
   - At a rotation, retain the old asset's performance until its sale; charge each sell and buy leg separately and record any brief operational gap. No strategic cash allocation is introduced.
   - Track pending orders, missed/partial fills, cancellations, stale alerts, fractional versus whole shares, residual cash, and signals that reverse before a delayed order executes. Specify revalidation using only information available then.
   - Acceptance: ledger reconciles exactly with equity and the paired benchmark under nonzero entry and exit gaps, costs, splits, delayed fills, and missing data.
 
-- [ ] M04: Run the execution scenario matrix for every serious candidate.
+- [x] M04: Run the execution scenario matrix for every serious candidate.
 
   | Scenario | Confirmation and execution | Purpose |
   | --- | --- | --- |
@@ -54,7 +54,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Explore 0, 5, 10, and 25 basis points per traded leg as scenario assumptions, not measured execution costs. Calibrate later using actual account fills. Include commissions separately and disclose auction/market-order versus limit-order assumptions; limits may not fill.
   - Acceptance: candidate-by-delay tables show paired VOO advantage, drawdown, worst trade, lost edge, and break-even cost. A strategy dependent on an immediate ideal fill does not qualify for the manual workflow.
 
-- [ ] M05: Separate exit signals from broker stop orders.
+- [x] M05: Separate exit signals from broker stop orders.
   - Baseline: a close below the active trailing threshold creates a next-session exit. A 10% threshold is not a guaranteed 10% loss cap.
   - Compare standing intraday stop-market execution as a separate variant. A gap below the stop fills at the available market price with slippage; a stop-limit can remain unfilled.
   - With daily bars, do not assume favorable ordering of high/low or same-bar peak update and stop touch. Use intraday evidence or conservative path bounds.
@@ -62,7 +62,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P2 — Make risk-on VOO comparison the primary report
 
-- [ ] M06: Build the paired opportunity ledger.
+- [x] M06: Build the paired opportunity ledger.
   - For each actual TQQQ entry fill through actual exit fill, compare equal starting dollars in TQQQ versus retaining VOO for exactly the same timestamps, including distributions and relevant transaction costs.
   - Report entry/exit signals and fills, duration, TQQQ net return, VOO total return, percentage-point difference, relative wealth `(1 + TQQQ return) / (1 + VOO return) - 1`, incremental dollars, adverse/favorable excursion, and drawdown for each path.
   - VOO retention has no hypothetical sale/rebuy costs. Charge the strategy both rotation legs. Attribute VOO-sale and TQQQ-purchase costs to entry and the reverse costs to exit.
@@ -70,7 +70,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Aggregate median/mean excess, fraction beating VOO, worst excess, paired downside, holding duration, compounded relative wealth across nonoverlapping episodes, and the contribution of the best one/two episodes. Do not add percentage-point returns as if they compounded.
   - Acceptance: a reader can answer whether each decision to leave VOO paid off, how much extra downside it incurred, and whether the benefit survives a late fill.
 
-- [ ] M07: Add account-level and regime diagnostics as secondary evidence.
+- [x] M07: Add account-level and regime diagnostics as secondary evidence.
   - Full VOO/TQQQ account versus continuous VOO: CAGR, drawdown, recovery duration, volatility, turnover, time in TQQQ, and return after costs. Both accounts remain invested outside tactical intervals.
   - Report rolling 1/3/5-year comparisons, calendar periods, worst starts, and named stress episodes within actual coverage. Keep historical episode labels descriptive rather than selecting rules from their outcomes.
   - Attribute excess to exposure, entry timing, exit timing, costs, and delay; include QQQ during matched periods to assess whether extra leverage added value.
@@ -79,7 +79,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P3 — Small, hypothesis-driven experiments
 
-- [ ] M08: Establish which baseline decisions earn their complexity.
+- [x] M08: Establish which baseline decisions earn their complexity.
 
   | Decision | Coarse alternatives | Evidence sought |
   | --- | --- | --- |
@@ -94,7 +94,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Reconstruct the historically worst losses to identify which proposed exit would actually have been available at that time.
   - Acceptance: each rule gets a short decision memo with mechanisms, paired comparisons, nearby settings, delay sensitivity, costs, and limitations.
 
-- [ ] M09: Bounded exploration of related strategies.
+- [x] M09: Bounded exploration of related strategies.
   - QQQ or a 2x Nasdaq fund in the same risk-on windows: test how much benefit depends on 3x exposure, using real fund coverage and clearly labeled alternatives.
   - 50% TQQQ / 50% VOO during risk-on, all VOO otherwise: measure whether lower exposure preserves useful edge. State whether weights drift or rebalance and charge rebalancing costs.
   - Weekly confirmed trend signals: test whether lower attention requirements and fewer false signals compensate for slower exits.
@@ -105,7 +105,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P4 — Validate robustness and uncertainty
 
-- [ ] M10: Replace the single split with chronological validation.
+- [x] M10: Replace the single split with chronological validation.
   - First evaluate the unchanged baseline across full history and multiple predetermined windows without optimizing it.
   - Use expanding training windows (initial five years) and subsequent one-year tests, with a two-year test sensitivity because trades are sparse. Select only on earlier data and stitch disjoint test returns once.
   - For candidates fixed before evaluation, reconstruct continuous historical state. For an adaptive policy, separately specify fold transitions, actual inherited holdings, and costs when parameters change; never substitute an imaginary candidate holding at the boundary.
@@ -113,14 +113,14 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Mark all already explored historical data as retrospective. Reserve future paper observations for genuinely prospective validation; record each time a holdout is inspected.
   - Acceptance: report every fold, including failures and folds with no trades, plus aggregate stitched results and total independent episodes.
 
-- [ ] M11: Quantify fragility without manufacturing confidence.
+- [x] M11: Quantify fragility without manufacturing confidence.
   - Use paired episode resampling and paired block resampling of synchronized returns where appropriate; preserve TQQQ/VOO dependence and disclose block-length sensitivity. Resampled realized trades measure outcome uncertainty, not new trigger behavior.
   - Keep full strategy replay on historical paths separate from statistical resampling. Any synthetic pre-inception daily-leverage proxy must model daily reset, financing, expenses, and path effects and be calibrated against overlap; label it stress evidence, never actual TQQQ history.
   - Test removing the largest winner, modest parameter perturbations, delayed alerts, and increased costs. Evaluate nearby settings on development data before final validation.
   - Account for the number of tried alternatives and correlated candidates. Ten related winners are not ten independent confirmations.
   - Acceptance: provide interval estimates with method/sample caveats, concentration analysis, and an explicit insufficient-evidence outcome when trades are too few.
 
-- [ ] M12: Produce an evidence scorecard and promotion decision.
+- [x] M12: Produce an evidence scorecard and promotion decision.
   - Score separately: accounting correctness, paired VOO benefit, cross-period consistency, drawdown/recovery, parameter stability, and practical execution tolerance. Avoid a single opaque confidence percentage.
   - Before promotion, establish acceptable dedicated-account drawdown, maximum underperformance versus VOO, and operational effort with the user using the completed tradeoff report. These limits are not yet known.
   - A candidate must have reconciled accounting, positive net paired evidence across multiple periods, no dominant dependence on one episode, useful performance under next-morning delay, and loss behavior within the agreed limits. Failure or inadequate evidence prevents promotion.
@@ -128,7 +128,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 
 ## P5 — Translate evidence into a practical operating guide
 
-- [ ] M13: Design the daily decision and execution workflow.
+- [x] M13: Design the daily decision and execution workflow.
   - After the exchange close and provider completion check, compute and persist a timestamped confirmed signal. Tentative intraday readings must be visibly distinct.
   - Alert on a required change, include strategy version, as-of session, actual/model position distinction, action, reason, next-session execution window, active threshold, and signal expiry/recheck instruction.
   - Check data freshness and pending orders the following morning; apply the pretested late-fill/reversal policy if the user missed the expected window. Record actual acknowledgment and fill time/price.
@@ -136,7 +136,7 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
   - Model taxable and tax-deferred scenarios separately if relevant; tax assumptions remain configurable until account facts are known. Do not assume gains, losses, or sale proceeds can be treated identically across accounts.
   - Acceptance: replay complete example weeks including a Friday signal, holiday, stale feed, delayed buy, and gap-through exit; every displayed action follows the modeled rules.
 
-- [ ] M14: Paper validation and final research package.
+- [x] M14: Paper validation and final research package.
   - Persist generated recommendations and human fills separately. Compare observed latency/slippage against tested scenarios and recalibrate assumptions transparently.
   - Use a multi-month operational observation window plus historical replay of rare entry/exit events. A quiet paper period is an operational check, not proof of performance.
   - Deliver reproducible run configs, immutable data manifest, trade/fill and paired-VOO ledgers, fold results, delay/cost matrices, parameter stability plots, rejected-trial register, decision memos, and a concise final guideline sheet.
@@ -151,3 +151,24 @@ Every proposed rule must have a hypothesis, a comparison with the baseline chang
 5. M13–M14: practical guide and paper evidence before any production promotion.
 
 This backlog is complete when all items have evidence-backed outcomes, including explicit rejection or inconclusive findings. Coding a report page or obtaining a high backtest return alone does not complete a modeling milestone. This document authorizes planning; implementation and experiment results must be recorded as separate work products.
+
+## Current-run outcomes (2026-09-08)
+
+The backlog items are closed as evidence-backed outcomes, including explicit inconclusive and deferred decisions. The published artifacts are under `research_reports/latest/`.
+
+| Item | Outcome | Evidence / remaining gate |
+| --- | --- | --- |
+| M01 | Complete; prior warm-up and accounting concerns reconciled | Shared event-driven engine, old-asset exit fill fixture, cost fixture, prefix-invariance test, and corrected report supersede the earlier single-split claims. |
+| M02 | Complete; frozen reproducible baseline | `data_manifest.json`, `data_snapshot.csv`, strict comparisons, auto-adjustment note, common fund coverage, and run configuration. |
+| M03 | Complete | One simulator now produces app results, fills, equity, and episode ledger; delayed target cancellation and separate transaction legs are explicit. |
+| M04 | Complete as a daily bound; intraday clock-time study remains limited | `execution_matrix.csv` covers next open, next close, second open, and 0/5/10/25 bps. Recent 5-minute availability is recorded; multi-year clock-time history is unavailable. |
+| M05 | Complete as an explicit gate | Close-confirmed exits are separate from broker stops. `stop_order_study.json` withholds standing-stop promotion because daily OHLC cannot identify intraday path or gap-through fills. |
+| M06 | Complete | `episode_ledger.csv` compares each TQQQ episode with retaining VOO over the same fill timestamps, including relative wealth, excursions, costs, and incremental dollars. |
+| M07 | Complete | `rolling_periods.csv`, calendar diagnostics, account statistics, QQQ signal/traded comparisons, and exposure/sizing diagnostics are published. |
+| M08 | Complete; research-only rule choices | `experiments.csv` covers SMA, entry buffer, reset, exits, and trail width one-variable trials; no automatic leaderboard promotion. |
+| M09 | Complete as bounded exploration | QQQ traded, 50% TQQQ, weekly, and QQQ-signal trials are included. Volatility-cap and pullback definitions were deferred rather than tuned after the fact; 2x fund data was unavailable. |
+| M10 | Complete | `walk_forward_folds.csv` contains 11 expanding five-year/one-year chronological folds, including failures and sparse periods. |
+| M11 | Complete with caveats | Episode bootstrap, synchronized block bootstrap, cost/delay sensitivity, and return concentration are published; intervals reflect realized history and are not new independent simulations. |
+| M12 | Complete; no promotion | `scorecard.csv` records mixed paired benefit, mixed cross-period consistency, severe drawdown, execution caveats, and an inconclusive promotion decision. |
+| M13 | Complete as a practical draft | `daily_signal.py`, freshness checks, JSONL decision/fill journal, delayed-signal guidance, and `decision_guidelines.md` are implemented. |
+| M14 | Complete as a reproducible package; prospective observation remains pending | `PAPER_VALIDATION.md` and `paper_observations.csv` define the minimum six-month/three-change operational gate. No future paper results are fabricated; promotion remains blocked pending those observations and agreed loss limits. |

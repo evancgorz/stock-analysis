@@ -5,7 +5,7 @@ import streamlit as st
 import yfinance as yf
 
 
-TICKERS = ["TQQQ", "SPY", "QQQ"]
+TICKERS = ["TQQQ", "VOO", "QQQ"]
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
@@ -108,7 +108,7 @@ def color_day_change(value: float) -> str:
 @st.fragment(run_every="1s")
 def render_live_snapshot() -> None:
     st.caption(
-        "Auto-refreshing while open. Quick snapshot for TQQQ, SPY, and QQQ with price, daily move, 52-week range, and 200-day SMA."
+        "Auto-refreshing while open. Quick snapshot for TQQQ, VOO, and QQQ with price, daily move, 52-week range, and 200-day SMA."
     )
 
     try:
